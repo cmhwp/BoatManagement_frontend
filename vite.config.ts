@@ -13,7 +13,9 @@ export default defineConfig({
     vueDevTools(),
     Components({
       resolvers: [
-        AntDesignVueResolver(),
+        AntDesignVueResolver({
+          importStyle: false, // css in js
+        }),
       ],
     }),
   ],

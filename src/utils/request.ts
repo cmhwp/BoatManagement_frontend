@@ -1,0 +1,122 @@
+import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse } from 'axios'
+import { message } from 'ant-design-vue'
+
+// 请求响应接口
+interface ApiResponse<T = any> {
+  code: number
+  data: T
+  message: string
+  success: boolean
+}
+
+// 创建axios实例
+const request: AxiosInstance = axios.create({
+  baseURL: 'http://localhost:8000/api/v1', // 后端API基础URL
+  timeout: 15000,
+  headers: {
+    'Content-Type': 'application/json'
+  }
+})
+
+// 请求拦截器
+request.interceptors.request.use(
+  (config) => {
+    // 从localStorage获取token
+    const token = localStorage.getItem('access_token')
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
+    return config
+  },
+  (error) => {
+    console.error('请求拦截器错误:', error)
+    return Promise.reject(error)
+  }
+)
+
+// 响应拦截器
+request.interceptors.response.use(
+  (response: AxiosResponse<ApiResponse>) => {
+    const { data } = response
+
+    // 如果是登录接口，直接返回原始响应
+    if (response.config.url?.includes('/auth/login')) {
+      return response
+    }
+
+    // 处理业务成功
+    if (data.success || response.status === 200) {
+      return response
+    }
+
+    // 处理业务错误
+    message.error(data.message || '请求失败')
+    return Promise.reject(new Error(data.message || '请求失败'))
+  },
+  (error) => {
+    console.error('响应拦截器错误:', error)
+
+    if (error.response) {
+      const { status, data } = error.response
+
+      switch (status) {
+        case 401:
+          message.error('未授权，请重新登录')
+          // 清除token
+          localStorage.removeItem('access_token')
+          localStorage.removeItem('user_info')
+          // 跳转到登录页
+          window.location.href = '/login'
+          break
+        case 403:
+          message.error('无权限访问')
+          break
+        case 404:
+          message.error('请求的资源不存在')
+          break
+        case 500:
+          message.error('服务器内部错误')
+          break
+        default:
+          message.error(data?.message || `请求失败: ${status}`)
+      }
+    } else if (error.request) {
+      message.error('网络连接异常，请检查网络')
+    } else {
+      message.error('请求配置错误')
+    }
+
+    return Promise.reject(error)
+  }
+)
+
+// 封装常用请求方法
+export const http = {
+  get<T = any>(url: string, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
+    return request.get(url, config).then(res => res.data)
+  },
+
+  post<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
+    return request.post(url, data, config).then(res => res.data)
+  },
+
+  put<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
+    return request.put(url, data, config).then(res => res.data)
+  },
+
+  delete<T = any>(url: string, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
+    return request.delete(url, config).then(res => res.data)
+  },
+
+  upload<T = any>(url: string, formData: FormData, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
+    return request.post(url, formData, {
+      ...config,
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        ...config?.headers
+      }
+    }).then(res => res.data)
+  }
+}
+
+export default request
