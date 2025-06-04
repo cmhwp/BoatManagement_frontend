@@ -39,11 +39,6 @@ request.interceptors.response.use(
   (response: AxiosResponse<ApiResponse>) => {
     const { data } = response
 
-    // 如果是登录接口，直接返回原始响应
-    if (response.config.url?.includes('/auth/login')) {
-      return response
-    }
-
     // 处理业务成功
     if (data.success || response.status === 200) {
       return response

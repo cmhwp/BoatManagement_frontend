@@ -18,7 +18,7 @@ export interface User {
   id: number
   username: string
   email: string
-  full_name?: string
+  real_name?: string
   phone?: string
   avatar?: string
   role: UserRole
@@ -39,7 +39,7 @@ export interface RegisterRequest {
   username: string
   email: string
   password: string
-  full_name?: string
+  real_name?: string
   phone?: string
   role?: UserRole
 }

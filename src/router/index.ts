@@ -23,7 +23,12 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: '/',
-    redirect: '/dashboard'
+    name: 'Root',
+    redirect: (to) => {
+      // 在路由重定向时，我们无法直接使用 userStore，
+      // 所以这里先重定向到 dashboard，在路由守卫中处理角色判断
+      return '/dashboard'
+    }
   },
   {
     path: '/dashboard',
@@ -147,19 +152,33 @@ router.beforeEach(async (to, from, next) => {
       }
     }
 
+    // 特殊处理：如果用户是admin且访问的是dashboard，重定向到admin页面
+    if (userStore.isAdmin && to.path === '/dashboard') {
+      next({ path: '/admin/dashboard' })
+      return
+    }
+
     // 检查角色权限
     if (to.meta.requiresRole) {
       const allowedRoles = to.meta.requiresRole as UserRole[]
       if (!userStore.userRole || !allowedRoles.includes(userStore.userRole)) {
-        // 无权限访问，跳转到首页
-        next({ path: '/dashboard' })
+        // 无权限访问，根据用户角色跳转到相应页面
+        if (userStore.isAdmin) {
+          next({ path: '/admin/dashboard' })
+        } else {
+          next({ path: '/dashboard' })
+        }
         return
       }
     }
   } else {
-    // 不需要登录的页面，如果已登录则跳转到首页
+    // 不需要登录的页面，如果已登录则根据角色跳转到相应首页
     if (userStore.isLoggedIn && (to.path === '/login' || to.path === '/register')) {
-      next({ path: '/dashboard' })
+      if (userStore.isAdmin) {
+        next({ path: '/admin/dashboard' })
+      } else {
+        next({ path: '/dashboard' })
+      }
       return
     }
   }

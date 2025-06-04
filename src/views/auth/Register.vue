@@ -42,7 +42,7 @@
           name="full_name"
         >
           <a-input
-            v-model:value="registerForm.full_name"
+            v-model:value="registerForm.real_name"
             size="large"
             placeholder="请输入真实姓名(可选)"
           />
@@ -152,7 +152,7 @@ const registerForm = reactive<RegisterRequest>({
   username: '',
   email: '',
   password: '',
-  full_name: '',
+  real_name: '',
   phone: '',
   role: 'user' as UserRole
 })
@@ -207,7 +207,7 @@ const handleRegister = async () => {
 
     // 清理空字段
     const formData = { ...registerForm }
-    if (!formData.full_name) delete formData.full_name
+    if (!formData.real_name) delete formData.real_name
     if (!formData.phone) delete formData.phone
 
     const response = await register(formData)

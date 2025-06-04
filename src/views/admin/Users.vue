@@ -160,7 +160,7 @@
               {{ selectedUser.email }}
             </a-descriptions-item>
             <a-descriptions-item label="真实姓名">
-              {{ selectedUser.full_name || '未设置' }}
+              {{ selectedUser.real_name || '未设置' }}
             </a-descriptions-item>
             <a-descriptions-item label="手机号">
               {{ selectedUser.phone || '未设置' }}

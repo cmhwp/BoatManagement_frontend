@@ -110,9 +110,22 @@ const handleLogin = async () => {
         localStorage.removeItem('remember_username')
       }
 
-      // 跳转到指定页面或首页
-      const redirect = route.query.redirect as string || '/dashboard'
-      await router.push(redirect)
+      // 根据用户角色和redirect参数决定跳转页面
+      let redirectPath: string
+
+      if (route.query.redirect) {
+        // 如果有指定的重定向路径，使用它
+        redirectPath = route.query.redirect as string
+      } else {
+        // 根据用户角色决定默认跳转页面
+        if (userStore.isAdmin) {
+          redirectPath = '/admin/dashboard'
+        } else {
+          redirectPath = '/dashboard'
+        }
+      }
+
+      await router.push(redirectPath)
     }
   } catch (error: any) {
     message.error(error.message || '登录失败')

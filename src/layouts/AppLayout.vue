@@ -67,7 +67,7 @@
                 <a-avatar size="small" :src="userStore.user?.avatar">
                   {{ userStore.user?.username?.charAt(0).toUpperCase() }}
                 </a-avatar>
-                <span>{{ userStore.user?.full_name || userStore.user?.username }}</span>
+                <span>{{ userStore.user?.real_name || userStore.user?.username }}</span>
                 <DownOutlined />
               </a-space>
 
@@ -209,11 +209,6 @@ const breadcrumbs = computed<BreadcrumbItem[]>(() => {
   return items
 })
 
-// 监听路由变化，更新菜单选中状态
-watch(() => route.path, (newPath) => {
-  updateSelectedKeys(newPath)
-}, { immediate: true })
-
 // 更新选中的菜单项
 const updateSelectedKeys = (path: string) => {
   const pathMap: Record<string, string> = {
@@ -234,6 +229,11 @@ const updateSelectedKeys = (path: string) => {
 
   selectedKeys.value = []
 }
+
+// 监听路由变化，更新菜单选中状态
+watch(() => route.path, (newPath) => {
+  updateSelectedKeys(newPath)
+}, { immediate: true })
 
 // 处理菜单点击
 const handleMenuClick = (path: string) => {

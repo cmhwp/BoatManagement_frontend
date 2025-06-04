@@ -109,7 +109,7 @@
                 <a-avatar size="small" :src="userStore.user?.avatar">
                   {{ userStore.user?.username?.charAt(0).toUpperCase() }}
                 </a-avatar>
-                <span>{{ userStore.user?.full_name || userStore.user?.username }}</span>
+                <span>{{ userStore.user?.real_name || userStore.user?.username }}</span>
                 <DownOutlined />
               </a-space>
 
@@ -182,6 +182,24 @@ const collapsed = ref(false)
 const selectedKeys = ref<string[]>([])
 const openKeys = ref<string[]>([])
 
+// 更新选中的菜单项
+const updateSelectedKeys = (path: string) => {
+  const pathMap: Record<string, string> = {
+    '/admin/dashboard': 'dashboard',
+    '/admin/users': 'users',
+    '/admin/merchants': 'merchants',
+    '/admin/boats': 'boats',
+    '/admin/crews': 'crews',
+    '/admin/bookings': 'bookings',
+    '/admin/settings': 'settings'
+  }
+
+  const key = pathMap[path]
+  if (key) {
+    selectedKeys.value = [key]
+  }
+}
+
 // 面包屑导航
 const breadcrumbs = computed<BreadcrumbItem[]>(() => {
   const items: BreadcrumbItem[] = [
@@ -213,24 +231,6 @@ const breadcrumbs = computed<BreadcrumbItem[]>(() => {
 watch(() => route.path, (newPath) => {
   updateSelectedKeys(newPath)
 }, { immediate: true })
-
-// 更新选中的菜单项
-const updateSelectedKeys = (path: string) => {
-  const pathMap: Record<string, string> = {
-    '/admin/dashboard': 'dashboard',
-    '/admin/users': 'users',
-    '/admin/merchants': 'merchants',
-    '/admin/boats': 'boats',
-    '/admin/crews': 'crews',
-    '/admin/bookings': 'bookings',
-    '/admin/settings': 'settings'
-  }
-
-  const key = pathMap[path]
-  if (key) {
-    selectedKeys.value = [key]
-  }
-}
 
 // 处理菜单点击
 const handleMenuClick = (path: string) => {
