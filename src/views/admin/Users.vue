@@ -94,8 +94,8 @@
 
           <!-- 最后登录时间 -->
           <template v-else-if="column.key === 'last_login'">
-            <span v-if="record.last_login">
-              {{ formatDate(record.last_login) }}
+            <span v-if="record.last_login_at">
+              {{ formatDate(record.last_login_at) }}
             </span>
             <span v-else class="text-muted">从未登录</span>
           </template>
@@ -179,7 +179,7 @@
               {{ formatDate(selectedUser.created_at) }}
             </a-descriptions-item>
             <a-descriptions-item label="最后登录">
-              {{ selectedUser.last_login ? formatDate(selectedUser.last_login) : '从未登录' }}
+              {{ selectedUser.last_login_at ? formatDate(selectedUser.last_login_at) : '从未登录' }}
             </a-descriptions-item>
           </a-descriptions>
         </div>
@@ -192,13 +192,12 @@
 import { ref, reactive, onMounted } from 'vue'
 import { message } from 'ant-design-vue'
 import { DownOutlined } from '@ant-design/icons-vue'
-import { getUserList } from '@/api'
-import type { User, UserRole, UserStatus, PaginationQuery } from '@/types'
+import { listAllUsersApiV1AdminUsersGet } from '@/services/api/admin'
 
 // 状态管理
 const loading = ref(false)
-const userList = ref<User[]>([])
-const selectedUser = ref<User | null>(null)
+const userList = ref<API.UserResponse[]>([])
+const selectedUser = ref<API.UserResponse | null>(null)
 const drawerVisible = ref(false)
 
 // 搜索表单
@@ -227,8 +226,8 @@ const columns = [
   },
   {
     title: '真实姓名',
-    dataIndex: 'full_name',
-    key: 'full_name',
+    dataIndex: 'real_name',
+    key: 'real_name',
     width: 120
   },
   {
@@ -271,18 +270,18 @@ const columns = [
 const loadUsers = async () => {
   try {
     loading.value = true
-    const params: PaginationQuery & { search?: string; role?: string; status?: string } = {
+    const params: API.listAllUsersApiV1AdminUsersGetParams = {
       page: pagination.current,
-      size: pagination.pageSize,
+      page_size: pagination.pageSize,
       search: searchForm.search || undefined,
-      role: searchForm.role || undefined,
-      status: searchForm.status || undefined
+      role: searchForm.role as API.UserRole || undefined,
+      status: searchForm.status as API.UserStatus || undefined
     }
 
-    const response = await getUserList(params)
-    if (response.success) {
-      userList.value = response.data.items
-      pagination.total = response.data.total
+    const response = await listAllUsersApiV1AdminUsersGet(params)
+    if (response.data) {
+      userList.value = response.data.items || []
+      pagination.total = response.data.total || 0
     }
   } catch (error: any) {
     message.error(error.message || '加载用户列表失败')
@@ -305,18 +304,18 @@ const handleTableChange = (pag: any) => {
 }
 
 // 处理查看用户
-const handleView = (user: User) => {
+const handleView = (user: API.UserResponse) => {
   selectedUser.value = user
   drawerVisible.value = true
 }
 
 // 处理编辑用户
-const handleEdit = (user: User) => {
+const handleEdit = (user: API.UserResponse) => {
   message.info('编辑功能开发中...')
 }
 
 // 处理菜单操作
-const handleMenuAction = (key: string, user: User) => {
+const handleMenuAction = (key: string, user: API.UserResponse) => {
   switch (key) {
     case 'resetPassword':
       message.info('重置密码功能开发中...')
@@ -337,7 +336,7 @@ const handleDrawerClose = () => {
 }
 
 // 获取角色颜色
-const getRoleColor = (role: UserRole) => {
+const getRoleColor = (role: API.UserRole) => {
   const colors = {
     admin: 'red',
     merchant: 'blue',
@@ -348,7 +347,7 @@ const getRoleColor = (role: UserRole) => {
 }
 
 // 获取角色文本
-const getRoleText = (role: UserRole) => {
+const getRoleText = (role: API.UserRole) => {
   const texts = {
     admin: '管理员',
     merchant: '商家',
@@ -359,21 +358,23 @@ const getRoleText = (role: UserRole) => {
 }
 
 // 获取状态颜色
-const getStatusColor = (status: UserStatus) => {
+const getStatusColor = (status: API.UserStatus) => {
   const colors = {
     active: 'green',
     inactive: 'orange',
-    suspended: 'red'
+    suspended: 'red',
+    deleted: 'red'
   }
   return colors[status] || 'default'
 }
 
 // 获取状态文本
-const getStatusText = (status: UserStatus) => {
+const getStatusText = (status: API.UserStatus) => {
   const texts = {
     active: '活跃',
     inactive: '未激活',
-    suspended: '已暂停'
+    suspended: '已暂停',
+    deleted: '已删除'
   }
   return texts[status] || status
 }

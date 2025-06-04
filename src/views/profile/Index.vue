@@ -11,7 +11,7 @@
         <a-card title="基本信息" class="profile-card">
           <a-form
             :model="profileForm"
-            :rules="rules"
+            :rules="profileRules"
             layout="vertical"
             @finish="handleUpdateProfile"
           >
@@ -38,9 +38,9 @@
 
             <a-row :gutter="16">
               <a-col :xs="24" :sm="12">
-                <a-form-item label="真实姓名" name="full_name">
+                <a-form-item label="真实姓名" name="real_name">
                   <a-input
-                    v-model:value="profileForm.full_name"
+                    v-model:value="profileForm.real_name"
                     placeholder="请输入真实姓名"
                   />
                 </a-form-item>
@@ -127,7 +127,7 @@
               {{ userStore.user?.username?.charAt(0).toUpperCase() }}
             </a-avatar>
             <div class="user-info">
-              <h3>{{ userStore.user?.full_name || userStore.user?.username }}</h3>
+              <h3>{{ userStore.user?.real_name || userStore.user?.username }}</h3>
               <a-tag :color="getRoleColor(userStore.user?.role)">
                 {{ getRoleText(userStore.user?.role) }}
               </a-tag>
@@ -146,7 +146,7 @@
                 {{ formatDate(userStore.user?.created_at) }}
               </a-descriptions-item>
               <a-descriptions-item label="最后登录">
-                {{ userStore.user?.last_login ? formatDate(userStore.user.last_login) : '当前会话' }}
+                {{ userStore.user?.last_login_at  ? formatDate(userStore.user.last_login_at) : '当前会话' }}
               </a-descriptions-item>
               <a-descriptions-item label="账户状态">
                 <a-tag :color="getStatusColor(userStore.user?.status)">
@@ -205,8 +205,7 @@ import {
   QuestionCircleOutlined
 } from '@ant-design/icons-vue'
 import { useUserStore } from '@/stores/user'
-import { updateProfile, changePassword } from '@/api'
-import type { UpdateUserRequest, ChangePasswordRequest, UserRole, UserStatus } from '@/types'
+import { updateCurrentUserUsersMePut } from '@/services/api/yonghuguanli'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -216,27 +215,27 @@ const updateLoading = ref(false)
 const passwordLoading = ref(false)
 
 // 个人信息表单
-const profileForm = reactive<UpdateUserRequest & { username: string }>({
+const profileForm = reactive<API.UserUpdate & { username: string }>({
   username: '',
   email: '',
-  full_name: '',
+  real_name: '',
   phone: ''
 })
 
 // 密码修改表单
-const passwordForm = reactive<ChangePasswordRequest>({
+const passwordForm = reactive({
   old_password: '',
   new_password: '',
   confirm_password: ''
 })
 
 // 表单验证规则
-const rules = {
+const profileRules = {
   email: [
     { required: true, message: '请输入邮箱', trigger: 'blur' },
     { type: 'email', message: '邮箱格式不正确', trigger: 'blur' }
   ],
-  full_name: [
+  real_name: [
     { max: 50, message: '姓名长度不能超过50个字符', trigger: 'blur' }
   ],
   phone: [
@@ -250,8 +249,7 @@ const passwordRules = {
   ],
   new_password: [
     { required: true, message: '请输入新密码', trigger: 'blur' },
-    { min: 6, message: '密码至少6位', trigger: 'blur' },
-    { pattern: /^(?=.*[a-zA-Z])(?=.*\d)/, message: '密码必须包含字母和数字', trigger: 'blur' }
+    { min: 6, message: '密码至少6位', trigger: 'blur' }
   ],
   confirm_password: [
     { required: true, message: '请确认新密码', trigger: 'blur' },
@@ -272,7 +270,7 @@ const initFormData = () => {
   if (userStore.user) {
     profileForm.username = userStore.user.username
     profileForm.email = userStore.user.email
-    profileForm.full_name = userStore.user.full_name || ''
+    profileForm.real_name = userStore.user.real_name || ''
     profileForm.phone = userStore.user.phone || ''
   }
 }
@@ -282,15 +280,15 @@ const handleUpdateProfile = async () => {
   try {
     updateLoading.value = true
 
-    const updateData: UpdateUserRequest = {
+    const updateData: API.UserUpdate = {
       email: profileForm.email,
-      full_name: profileForm.full_name || undefined,
+      real_name: profileForm.real_name || undefined,
       phone: profileForm.phone || undefined
     }
 
-    const response = await updateProfile(updateData)
-    if (response.success) {
-      userStore.setUser(response.data)
+    const response = await updateCurrentUserUsersMePut(updateData)
+    if (response.data?.success) {
+      userStore.setUser(response.data.data!)
       message.success('个人信息更新成功')
     }
   } catch (error: any) {
@@ -308,22 +306,7 @@ const handleReset = () => {
 
 // 修改密码
 const handleChangePassword = async () => {
-  try {
-    passwordLoading.value = true
-
-    const response = await changePassword(passwordForm)
-    if (response.success) {
-      message.success('密码修改成功')
-      // 清空密码表单
-      passwordForm.old_password = ''
-      passwordForm.new_password = ''
-      passwordForm.confirm_password = ''
-    }
-  } catch (error: any) {
-    message.error(error.message || '密码修改失败')
-  } finally {
-    passwordLoading.value = false
-  }
+  message.info('修改密码功能暂未实现，请联系管理员')
 }
 
 // 处理头像上传
@@ -349,7 +332,7 @@ const handleGoToHelp = () => {
 }
 
 // 获取角色颜色
-const getRoleColor = (role?: UserRole) => {
+const getRoleColor = (role?:API.UserRole) => {
   if (!role) return 'default'
   const colors = {
     admin: 'red',
@@ -361,7 +344,7 @@ const getRoleColor = (role?: UserRole) => {
 }
 
 // 获取角色文本
-const getRoleText = (role?: UserRole) => {
+const getRoleText = (role?: API.UserRole) => {
   if (!role) return '未知'
   const texts = {
     admin: '管理员',
@@ -373,23 +356,25 @@ const getRoleText = (role?: UserRole) => {
 }
 
 // 获取状态颜色
-const getStatusColor = (status?: UserStatus) => {
+const getStatusColor = (status?: API.UserStatus) => {
   if (!status) return 'default'
   const colors = {
     active: 'green',
     inactive: 'orange',
-    suspended: 'red'
+    suspended: 'red',
+    deleted: 'red'
   }
   return colors[status] || 'default'
 }
 
 // 获取状态文本
-const getStatusText = (status?: UserStatus) => {
+const getStatusText = (status?: API.UserStatus) => {
   if (!status) return '未知'
   const texts = {
     active: '活跃',
     inactive: '未激活',
-    suspended: '已暂停'
+    suspended: '已暂停',
+    deleted: '已删除'
   }
   return texts[status] || status
 }

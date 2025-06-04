@@ -142,19 +142,18 @@ import {
   MailOutlined,
   PhoneOutlined
 } from '@ant-design/icons-vue'
-import { register } from '@/api'
-import type { RegisterRequest, UserRole } from '@/types'
+import { registerApiV1AuthRegisterPost } from '@/services/api/renzheng'
 
 const router = useRouter()
 
 // 表单数据
-const registerForm = reactive<RegisterRequest>({
+const registerForm = reactive<API.UserCreate>({
   username: '',
   email: '',
   password: '',
   real_name: '',
   phone: '',
-  role: 'user' as UserRole
+  role: 'user' as API.UserRole
 })
 
 const confirmPassword = ref('')
@@ -185,19 +184,7 @@ const rules = {
     { required: true, message: '请输入密码', trigger: 'blur' },
     { min: 6, message: '密码至少6位', trigger: 'blur' },
     { pattern: /^(?=.*[a-zA-Z])(?=.*\d)/, message: '密码必须包含字母和数字', trigger: 'blur' }
-  ],
-  // confirmPassword: [
-  //   { required: true, message: '请确认密码', trigger: 'blur' },
-  //   {
-  //     validator: (_rule: any, value: string) => {
-  //       if (value && value !== registerForm.password) {
-  //         return Promise.reject('两次输入的密码不一致')
-  //       }
-  //       return Promise.resolve()
-  //     },
-  //     trigger: 'blur'
-  //   }
-  // ]
+  ]
 }
 
 // 处理注册
@@ -210,13 +197,13 @@ const handleRegister = async () => {
     if (!formData.real_name) delete formData.real_name
     if (!formData.phone) delete formData.phone
 
-    const response = await register(formData)
+    const response = await registerApiV1AuthRegisterPost(formData)
 
-    if (response.success) {
+    if (response.data?.success) {
       message.success('注册成功，请登录')
       await router.push('/login')
     } else {
-      message.error(response.message || '注册失败')
+      message.error(response.data?.message || '注册失败')
     }
   } catch (error: any) {
     message.error(error.message || '注册失败')

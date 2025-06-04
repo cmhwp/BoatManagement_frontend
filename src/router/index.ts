@@ -1,7 +1,5 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import { useUserStore } from '@/stores/user'
-import { UserRole } from '@/types'
-
 const routes: RouteRecordRaw[] = [
   {
     path: '/login',
@@ -55,7 +53,7 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/layouts/AdminLayout.vue'),
     meta: {
       requiresAuth: true,
-      requiresRole: [UserRole.ADMIN],
+      requiresRole: ['admin'],
       title: '管理中心'
     },
     children: [
@@ -160,7 +158,7 @@ router.beforeEach(async (to, from, next) => {
 
     // 检查角色权限
     if (to.meta.requiresRole) {
-      const allowedRoles = to.meta.requiresRole as UserRole[]
+      const allowedRoles = to.meta.requiresRole as API.UserRole[]
       if (!userStore.userRole || !allowedRoles.includes(userStore.userRole)) {
         // 无权限访问，根据用户角色跳转到相应页面
         if (userStore.isAdmin) {

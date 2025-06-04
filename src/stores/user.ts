@@ -1,23 +1,25 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { message } from 'ant-design-vue'
-import { login as loginApi, logout as logoutApi, getCurrentUser } from '@/api'
-import type { User, LoginRequest } from '@/types'
-import { UserRole } from '@/types'
+import {
+  loginApiV1AuthLoginPost,
+  logoutApiV1AuthLogoutPost,
+  getCurrentUserInfoApiV1AuthMeGet
+} from '@/services/api/renzheng'
 
 export const useUserStore = defineStore('user', () => {
   // 状态
-  const user = ref<User | null>(null)
+  const user = ref<API.UserResponse | null>(null)
   const token = ref<string>(localStorage.getItem('access_token') || '')
   const loading = ref(false)
 
   // 计算属性
   const isLoggedIn = computed(() => !!token.value && !!user.value)
   const userRole = computed(() => user.value?.role)
-  const isAdmin = computed(() => userRole.value === UserRole.ADMIN)
-  const isMerchant = computed(() => userRole.value === UserRole.MERCHANT)
-  const isUser = computed(() => userRole.value === UserRole.USER)
-  const isCrew = computed(() => userRole.value === UserRole.CREW)
+  const isAdmin = computed(() => userRole.value === 'admin')
+  const isMerchant = computed(() => userRole.value === 'merchant')
+  const isUser = computed(() => userRole.value === 'user')
+  const isCrew = computed(() => userRole.value === 'crew')
 
   // 设置token
   const setToken = (newToken: string) => {
@@ -26,7 +28,7 @@ export const useUserStore = defineStore('user', () => {
   }
 
   // 设置用户信息
-  const setUser = (userInfo: User) => {
+  const setUser = (userInfo: API.UserResponse) => {
     user.value = userInfo
     localStorage.setItem('user_info', JSON.stringify(userInfo))
   }
@@ -40,19 +42,21 @@ export const useUserStore = defineStore('user', () => {
   }
 
   // 登录
-  const login = async (loginForm: LoginRequest) => {
+  const login = async (loginForm: API.UserLogin) => {
     try {
       loading.value = true
-      const response = await loginApi(loginForm)
+      const response = await loginApiV1AuthLoginPost(loginForm)
 
-      if (response.success) {
-        const { access_token, user: userInfo } = response.data
+      if (response.data?.success) {
+        const tokenData = response.data.data!
+        const { access_token, user: userInfo } = tokenData
+
         setToken(access_token)
         setUser(userInfo)
         message.success('登录成功')
         return true
       } else {
-        message.error(response.message || '登录失败')
+        message.error(response.data?.message || '登录失败')
         return false
       }
     } catch (error: any) {
@@ -66,7 +70,7 @@ export const useUserStore = defineStore('user', () => {
   // 登出
   const logout = async () => {
     try {
-      await logoutApi()
+      await logoutApiV1AuthLogoutPost()
     } catch (error) {
       console.error('登出接口调用失败:', error)
     } finally {
@@ -80,9 +84,9 @@ export const useUserStore = defineStore('user', () => {
     try {
       if (!token.value) return false
 
-      const response = await getCurrentUser()
-      if (response.success) {
-        setUser(response.data)
+      const response = await getCurrentUserInfoApiV1AuthMeGet()
+      if (response.data?.success) {
+        setUser(response.data.data!)
         return true
       } else {
         clearUser()
@@ -97,9 +101,12 @@ export const useUserStore = defineStore('user', () => {
 
   // 初始化用户信息
   const initUserInfo = () => {
+    const savedToken = localStorage.getItem('access_token')
     const savedUserInfo = localStorage.getItem('user_info')
-    if (savedUserInfo && token.value) {
+
+    if (savedUserInfo && savedToken) {
       try {
+        token.value = savedToken
         user.value = JSON.parse(savedUserInfo)
       } catch (error) {
         console.error('解析用户信息失败:', error)

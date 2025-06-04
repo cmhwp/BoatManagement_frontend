@@ -72,14 +72,13 @@ import { useRouter, useRoute } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { UserOutlined, LockOutlined } from '@ant-design/icons-vue'
 import { useUserStore } from '@/stores/user'
-import type { LoginRequest } from '@/types'
 
 const router = useRouter()
 const route = useRoute()
 const userStore = useUserStore()
 
 // 表单数据
-const loginForm = reactive<LoginRequest>({
+const loginForm = reactive<API.UserLogin>({
   username: '',
   password: ''
 })

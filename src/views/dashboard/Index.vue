@@ -1,7 +1,7 @@
 <template>
   <div class="dashboard-page">
     <div class="dashboard-header">
-      <h1>欢迎回来，{{ userStore.user?.full_name || userStore.user?.username }}！</h1>
+      <h1>欢迎回来，{{ userStore.user?.real_name || userStore.user?.username }}！</h1>
       <p class="welcome-text">今天是个美好的一天，开始您的船艇之旅吧</p>
     </div>
 

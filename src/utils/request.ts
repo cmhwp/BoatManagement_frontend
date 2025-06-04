@@ -11,7 +11,7 @@ interface ApiResponse<T = any> {
 
 // 创建axios实例
 const request: AxiosInstance = axios.create({
-  baseURL: 'http://localhost:8000/api/v1', // 后端API基础URL
+  baseURL: 'http://localhost:8000', // 后端API基础URL
   timeout: 15000,
   headers: {
     'Content-Type': 'application/json'
