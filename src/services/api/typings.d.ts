@@ -341,7 +341,7 @@ declare namespace API {
     user_id: number
   }
 
-  type getUserDetailUsersUserIdGetParams = {
+  type getUserDetailApiV1UsersUserIdGetParams = {
     user_id: number
   }
 
@@ -647,7 +647,7 @@ declare namespace API {
     user_id: number
   }
 
-  type updateUserInfoUsersUserIdPutParams = {
+  type updateUserInfoApiV1UsersUserIdPutParams = {
     user_id: number
   }
 

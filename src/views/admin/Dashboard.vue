@@ -51,7 +51,7 @@
             :value-style="{ color: '#722ed1' }"
           >
             <template #prefix>
-              <CarOutlined />
+              <Sailboat />
             </template>
           </a-statistic>
           <div class="stat-trend">
@@ -189,10 +189,11 @@ import { useRouter } from 'vue-router'
 import {
   UserOutlined,
   ShopOutlined,
-  CarOutlined,
+  TeamOutlined,
   CalendarOutlined,
   LineChartOutlined
 } from '@ant-design/icons-vue'
+import { Sailboat } from '@icon-park/vue-next'
 
 const router = useRouter()
 

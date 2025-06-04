@@ -5,7 +5,7 @@ import {
   loginApiV1AuthLoginPost,
   logoutApiV1AuthLogoutPost,
   getCurrentUserInfoApiV1AuthMeGet
-} from '@/services/api/renzheng'
+} from '@/services/api/auth'
 
 export const useUserStore = defineStore('user', () => {
   // 状态

@@ -22,7 +22,7 @@
             </a-menu-item>
 
             <a-menu-item key="boats" @click="handleMenuClick('/boats')">
-              <CarOutlined />
+              <Sailboat />
               船艇服务
             </a-menu-item>
 
@@ -156,8 +156,11 @@ import {
   SettingOutlined,
   QuestionCircleOutlined,
   DownOutlined,
-  LogoutOutlined
+  LogoutOutlined,
+  MenuFoldOutlined,
+  MenuUnfoldOutlined
 } from '@ant-design/icons-vue'
+import { Sailboat } from '@icon-park/vue-next'
 import { useUserStore } from '@/stores/user'
 import type { BreadcrumbItem } from '@/types'
 

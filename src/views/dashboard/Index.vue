@@ -12,7 +12,7 @@
           <a-card class="action-card" @click="handleQuickAction('/boats')">
             <div class="action-content">
               <div class="action-icon boats">
-                <CarOutlined />
+                <Sailboat />
               </div>
               <div class="action-info">
                 <h3>浏览船艇</h3>
@@ -134,12 +134,12 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import {
-  CarOutlined,
-  CalendarOutlined,
+  UserOutlined,
   ShopOutlined,
   TeamOutlined,
-  UserOutlined
+  CalendarOutlined
 } from '@ant-design/icons-vue'
+import { Sailboat } from '@icon-park/vue-next'
 import { useUserStore } from '@/stores/user'
 
 const router = useRouter()

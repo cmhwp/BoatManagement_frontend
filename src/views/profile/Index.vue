@@ -205,7 +205,7 @@ import {
   QuestionCircleOutlined
 } from '@ant-design/icons-vue'
 import { useUserStore } from '@/stores/user'
-import { updateCurrentUserUsersMePut } from '@/services/api/yonghuguanli'
+import { updateCurrentUserApiV1UsersMePut } from '@/services/api/users'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -286,7 +286,7 @@ const handleUpdateProfile = async () => {
       phone: profileForm.phone || undefined
     }
 
-    const response = await updateCurrentUserUsersMePut(updateData)
+    const response = await updateCurrentUserApiV1UsersMePut(updateData)
     if (response.data?.success) {
       userStore.setUser(response.data.data!)
       message.success('个人信息更新成功')

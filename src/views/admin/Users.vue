@@ -1,221 +1,105 @@
 <template>
   <div class="admin-users">
-    <div class="page-header">
-      <h2>用户管理</h2>
-      <p>管理平台所有用户账户</p>
-    </div>
-
-    <!-- 搜索和操作栏 -->
-    <a-card class="search-card">
-      <a-row :gutter="[16, 16]" align="middle">
-        <a-col :xs="24" :sm="8">
-          <a-input-search
-            v-model:value="searchForm.search"
-            placeholder="搜索用户名、邮箱或姓名"
-            @search="handleSearch"
-            @pressEnter="handleSearch"
-          />
-        </a-col>
-
-        <a-col :xs="24" :sm="6">
-          <a-select
-            v-model:value="searchForm.role"
-            placeholder="选择角色"
-            allowClear
-            @change="handleSearch"
-          >
-            <a-select-option value="">全部角色</a-select-option>
-            <a-select-option value="admin">管理员</a-select-option>
-            <a-select-option value="merchant">商家</a-select-option>
-            <a-select-option value="user">普通用户</a-select-option>
-            <a-select-option value="crew">船员</a-select-option>
-          </a-select>
-        </a-col>
-
-        <a-col :xs="24" :sm="6">
-          <a-select
-            v-model:value="searchForm.status"
-            placeholder="选择状态"
-            allowClear
-            @change="handleSearch"
-          >
-            <a-select-option value="">全部状态</a-select-option>
-            <a-select-option value="active">活跃</a-select-option>
-            <a-select-option value="inactive">未激活</a-select-option>
-            <a-select-option value="suspended">已暂停</a-select-option>
-          </a-select>
-        </a-col>
-
-        <a-col :xs="24" :sm="4">
-          <a-button type="primary" @click="handleSearch" :loading="loading">
-            搜索
-          </a-button>
-        </a-col>
-      </a-row>
-    </a-card>
-
-    <!-- 用户列表 -->
-    <a-card>
-      <a-table
-        :columns="columns"
-        :data-source="userList"
-        :pagination="pagination"
-        :loading="loading"
-        @change="handleTableChange"
-        row-key="id"
-      >
-        <!-- 用户信息 -->
-        <template #bodyCell="{ column, record }">
-          <template v-if="column.key === 'user'">
-            <div class="user-info">
-              <a-avatar size="small" :src="record.avatar">
-                {{ record.username.charAt(0).toUpperCase() }}
-              </a-avatar>
-              <div class="user-details">
-                <div class="username">{{ record.username }}</div>
-                <div class="email">{{ record.email }}</div>
-              </div>
-            </div>
-          </template>
-
-          <!-- 角色标签 -->
-          <template v-else-if="column.key === 'role'">
-            <a-tag :color="getRoleColor(record.role)">
-              {{ getRoleText(record.role) }}
-            </a-tag>
-          </template>
-
-          <!-- 状态标签 -->
-          <template v-else-if="column.key === 'status'">
-            <a-tag :color="getStatusColor(record.status)">
-              {{ getStatusText(record.status) }}
-            </a-tag>
-          </template>
-
-          <!-- 最后登录时间 -->
-          <template v-else-if="column.key === 'last_login'">
-            <span v-if="record.last_login_at">
-              {{ formatDate(record.last_login_at) }}
-            </span>
-            <span v-else class="text-muted">从未登录</span>
-          </template>
-
-          <!-- 操作按钮 -->
-          <template v-else-if="column.key === 'action'">
-            <a-space>
-              <a-button size="small" @click="handleView(record)">
-                查看
-              </a-button>
-              <a-button
-                size="small"
-                type="primary"
-                @click="handleEdit(record)"
-                :disabled="record.role === 'admin'"
-              >
-                编辑
-              </a-button>
-              <a-dropdown>
-                <a-button size="small">
-                  更多
-                  <DownOutlined />
-                </a-button>
-                <template #overlay>
-                  <a-menu @click="(info: any) => handleMenuAction(info.key, record)">
-                    <a-menu-item
-                      key="resetPassword"
-                      :disabled="record.role === 'admin'"
-                    >
-                      重置密码
-                    </a-menu-item>
-                    <a-menu-item
-                      :key="record.status === 'active' ? 'suspend' : 'activate'"
-                      :disabled="record.role === 'admin'"
-                    >
-                      {{ record.status === 'active' ? '暂停账户' : '激活账户' }}
-                    </a-menu-item>
-                  </a-menu>
-                </template>
-              </a-dropdown>
-            </a-space>
-          </template>
-        </template>
-      </a-table>
-    </a-card>
-
-    <!-- 用户详情抽屉 -->
-    <a-drawer
-      v-model:open="drawerVisible"
-      title="用户详情"
-      width="480"
-      @close="handleDrawerClose"
+    <AdminTable
+      title="用户管理"
+      subtitle="管理平台所有用户账户"
+      :columns="columns"
+      :search-config="searchConfig"
+      :action-config="actionConfig"
+      :detail-config="detailConfig"
+      :api-config="apiConfig"
+      @edit="handleEdit"
+      @menu-action="handleMenuAction"
     >
-      <div v-if="selectedUser" class="user-detail">
-        <div class="detail-section">
-          <h4>基本信息</h4>
-          <a-descriptions :column="1" bordered size="small">
-            <a-descriptions-item label="用户名">
-              {{ selectedUser.username }}
-            </a-descriptions-item>
-            <a-descriptions-item label="邮箱">
-              {{ selectedUser.email }}
-            </a-descriptions-item>
-            <a-descriptions-item label="真实姓名">
-              {{ selectedUser.real_name || '未设置' }}
-            </a-descriptions-item>
-            <a-descriptions-item label="手机号">
-              {{ selectedUser.phone || '未设置' }}
-            </a-descriptions-item>
-            <a-descriptions-item label="角色">
-              <a-tag :color="getRoleColor(selectedUser.role)">
-                {{ getRoleText(selectedUser.role) }}
-              </a-tag>
-            </a-descriptions-item>
-            <a-descriptions-item label="状态">
-              <a-tag :color="getStatusColor(selectedUser.status)">
-                {{ getStatusText(selectedUser.status) }}
-              </a-tag>
-            </a-descriptions-item>
-            <a-descriptions-item label="注册时间">
-              {{ formatDate(selectedUser.created_at) }}
-            </a-descriptions-item>
-            <a-descriptions-item label="最后登录">
-              {{ selectedUser.last_login_at ? formatDate(selectedUser.last_login_at) : '从未登录' }}
-            </a-descriptions-item>
-          </a-descriptions>
+      <!-- 自定义列渲染 -->
+      <template #bodyCell="{ column, record }">
+        <!-- 用户信息 -->
+        <template v-if="column.key === 'user'">
+          <div class="user-info">
+            <a-avatar size="small" :src="record.avatar">
+              {{ record.username.charAt(0).toUpperCase() }}
+            </a-avatar>
+            <div class="user-details">
+              <div class="username">{{ record.username }}</div>
+              <div class="email">{{ record.email }}</div>
+            </div>
+          </div>
+        </template>
+
+        <!-- 角色标签 -->
+        <template v-else-if="column.key === 'role'">
+          <a-tag :color="getRoleColor(record.role)">
+            {{ getRoleText(record.role) }}
+          </a-tag>
+        </template>
+
+        <!-- 状态标签 -->
+        <template v-else-if="column.key === 'status'">
+          <a-tag :color="getStatusColor(record.status)">
+            {{ getStatusText(record.status) }}
+          </a-tag>
+        </template>
+
+        <!-- 最后登录时间 -->
+        <template v-else-if="column.key === 'last_login'">
+          <span v-if="record.last_login_at">
+            {{ formatDate(record.last_login_at) }}
+          </span>
+          <span v-else class="text-muted">从未登录</span>
+        </template>
+
+        <!-- 注册时间 -->
+        <template v-else-if="column.key === 'created_at'">
+          {{ formatDate(record.created_at) }}
+        </template>
+      </template>
+
+      <!-- 自定义详情页面 -->
+      <template #detail="{ record }">
+        <div v-if="record" class="user-detail">
+          <div class="detail-section">
+            <h4>基本信息</h4>
+            <a-descriptions :column="1" bordered size="small">
+              <a-descriptions-item label="用户名">
+                {{ record.username }}
+              </a-descriptions-item>
+              <a-descriptions-item label="邮箱">
+                {{ record.email }}
+              </a-descriptions-item>
+              <a-descriptions-item label="真实姓名">
+                {{ record.real_name || '未设置' }}
+              </a-descriptions-item>
+              <a-descriptions-item label="手机号">
+                {{ record.phone || '未设置' }}
+              </a-descriptions-item>
+              <a-descriptions-item label="角色">
+                <a-tag :color="getRoleColor(record.role)">
+                  {{ getRoleText(record.role) }}
+                </a-tag>
+              </a-descriptions-item>
+              <a-descriptions-item label="状态">
+                <a-tag :color="getStatusColor(record.status)">
+                  {{ getStatusText(record.status) }}
+                </a-tag>
+              </a-descriptions-item>
+              <a-descriptions-item label="注册时间">
+                {{ formatDate(record.created_at) }}
+              </a-descriptions-item>
+              <a-descriptions-item label="最后登录">
+                {{ record.last_login_at ? formatDate(record.last_login_at) : '从未登录' }}
+              </a-descriptions-item>
+            </a-descriptions>
+          </div>
         </div>
-      </div>
-    </a-drawer>
+      </template>
+    </AdminTable>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
 import { message } from 'ant-design-vue'
-import { DownOutlined } from '@ant-design/icons-vue'
+import AdminTable from '@/components/AdminTable.vue'
 import { listAllUsersApiV1AdminUsersGet } from '@/services/api/admin'
-
-// 状态管理
-const loading = ref(false)
-const userList = ref<API.UserResponse[]>([])
-const selectedUser = ref<API.UserResponse | null>(null)
-const drawerVisible = ref(false)
-
-// 搜索表单
-const searchForm = reactive({
-  search: '',
-  role: '',
-  status: ''
-})
-
-// 分页配置
-const pagination = reactive({
-  current: 1,
-  pageSize: 10,
-  total: 0,
-  showSizeChanger: true,
-  showQuickJumper: true,
-  showTotal: (total: number) => `共 ${total} 条记录`
-})
 
 // 表格列配置
 const columns = [
@@ -253,60 +137,65 @@ const columns = [
   },
   {
     title: '注册时间',
-    dataIndex: 'created_at',
     key: 'created_at',
-    width: 150,
-    customRender: ({ text }: { text: string }) => formatDate(text)
-  },
-  {
-    title: '操作',
-    key: 'action',
-    width: 200,
-    fixed: 'right'
+    width: 150
   }
 ]
 
-// 加载用户列表
-const loadUsers = async () => {
-  try {
-    loading.value = true
-    const params: API.listAllUsersApiV1AdminUsersGetParams = {
-      page: pagination.current,
-      page_size: pagination.pageSize,
-      search: searchForm.search || undefined,
-      role: searchForm.role as API.UserRole || undefined,
-      status: searchForm.status as API.UserStatus || undefined
+// 搜索配置
+const searchConfig = {
+  placeholder: '搜索用户名、邮箱或姓名',
+  filters: [
+    {
+      key: 'role',
+      placeholder: '选择角色',
+      options: [
+        { label: '全部角色', value: '' },
+        { label: '管理员', value: 'admin' },
+        { label: '商家', value: 'merchant' },
+        { label: '普通用户', value: 'user' },
+        { label: '船员', value: 'crew' }
+      ]
+    },
+    {
+      key: 'status',
+      placeholder: '选择状态',
+      options: [
+        { label: '全部状态', value: '' },
+        { label: '活跃', value: 'active' },
+        { label: '未激活', value: 'inactive' },
+        { label: '已暂停', value: 'suspended' }
+      ]
     }
-
-    const response = await listAllUsersApiV1AdminUsersGet(params)
-    if (response.data) {
-      userList.value = response.data.items || []
-      pagination.total = response.data.total || 0
-    }
-  } catch (error: any) {
-    message.error(error.message || '加载用户列表失败')
-  } finally {
-    loading.value = false
-  }
+  ]
 }
 
-// 处理搜索
-const handleSearch = () => {
-  pagination.current = 1
-  loadUsers()
+// 操作配置
+const actionConfig = {
+  moreActions: [
+    { key: 'resetPassword', label: '重置密码' },
+    { key: 'suspend', label: '暂停账户' },
+    { key: 'activate', label: '激活账户' }
+  ]
 }
 
-// 处理表格变化
-const handleTableChange = (pag: any) => {
-  pagination.current = pag.current
-  pagination.pageSize = pag.pageSize
-  loadUsers()
+// 详情配置
+const detailConfig = {
+  title: '用户详情',
+  width: 480,
+  fields: []
 }
 
-// 处理查看用户
-const handleView = (user: API.UserResponse) => {
-  selectedUser.value = user
-  drawerVisible.value = true
+// API配置
+const apiConfig = {
+  list: listAllUsersApiV1AdminUsersGet,
+  listParams: (searchForm: any, pagination: any) => ({
+    page: pagination.current,
+    page_size: pagination.pageSize,
+    search: searchForm.search || undefined,
+    role: searchForm.role as API.UserRole || undefined,
+    status: searchForm.status as API.UserStatus || undefined
+  })
 }
 
 // 处理编辑用户
@@ -327,12 +216,6 @@ const handleMenuAction = (key: string, user: API.UserResponse) => {
       message.info('激活账户功能开发中...')
       break
   }
-}
-
-// 关闭抽屉
-const handleDrawerClose = () => {
-  drawerVisible.value = false
-  selectedUser.value = null
 }
 
 // 获取角色颜色
@@ -389,33 +272,11 @@ const formatDate = (date: string) => {
     minute: '2-digit'
   })
 }
-
-onMounted(() => {
-  loadUsers()
-})
 </script>
 
 <style scoped>
 .admin-users {
-  padding: 24px;
-}
-
-.page-header {
-  margin-bottom: 24px;
-}
-
-.page-header h2 {
-  margin: 0 0 8px 0;
-  color: #333;
-}
-
-.page-header p {
-  margin: 0;
-  color: #666;
-}
-
-.search-card {
-  margin-bottom: 24px;
+  /* 移除padding，让AdminTable组件处理 */
 }
 
 .user-info {
