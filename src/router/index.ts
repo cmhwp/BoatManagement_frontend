@@ -92,6 +92,14 @@ const routes: RouteRecordRaw[] = [
         meta: {
           title: '船舶管理'
         }
+      },
+      {
+        path: 'crews',
+        name: 'AdminCrews',
+        component: () => import('@/views/admin/Crews.vue'),
+        meta: {
+          title: '船员管理'
+        }
       }
     ]
   },

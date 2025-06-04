@@ -42,6 +42,7 @@ declare module 'vue' {
     AProgress: typeof import('ant-design-vue/es')['Progress']
     ARadio: typeof import('ant-design-vue/es')['Radio']
     ARadioGroup: typeof import('ant-design-vue/es')['RadioGroup']
+    ARate: typeof import('ant-design-vue/es')['Rate']
     ARow: typeof import('ant-design-vue/es')['Row']
     ASelect: typeof import('ant-design-vue/es')['Select']
     ASelectOption: typeof import('ant-design-vue/es')['SelectOption']
