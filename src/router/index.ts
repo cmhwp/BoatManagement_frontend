@@ -84,6 +84,14 @@ const routes: RouteRecordRaw[] = [
         meta: {
           title: '商家管理'
         }
+      },
+      {
+        path: 'boats',
+        name: 'AdminBoats',
+        component: () => import('@/views/admin/Boats.vue'),
+        meta: {
+          title: '船舶管理'
+        }
       }
     ]
   },

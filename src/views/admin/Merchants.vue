@@ -331,10 +331,6 @@ const formatDate = (date: string) => {
 </script>
 
 <style scoped>
-.admin-merchants {
-  /* 移除padding，让AdminTable组件处理 */
-}
-
 .merchant-info {
   display: flex;
   align-items: center;

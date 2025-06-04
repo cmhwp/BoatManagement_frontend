@@ -275,9 +275,6 @@ const formatDate = (date: string) => {
 </script>
 
 <style scoped>
-.admin-users {
-  /* 移除padding，让AdminTable组件处理 */
-}
 
 .user-info {
   display: flex;
