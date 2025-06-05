@@ -8,6 +8,8 @@ import * as merchants from './merchants'
 import * as crews from './crews'
 import * as boats from './boats'
 import * as admin from './admin'
+import * as identity from './identity'
+import * as upload from './upload'
 import * as genlujing from './genlujing'
 import * as xitong from './xitong'
 export default {
@@ -17,6 +19,8 @@ export default {
   crews,
   boats,
   admin,
+  identity,
+  upload,
   genlujing,
   xitong,
 }

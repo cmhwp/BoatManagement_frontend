@@ -61,3 +61,25 @@ export async function updateCurrentUserApiV1UsersMePut(
     ...(options || {}),
   })
 }
+
+/** 获取用户完整档案 获取当前用户的完整档案信息
+
+包括基本信息、实名认证状态、角色信息等 GET /api/v1/users/me/profile */
+export async function getUserProfileApiV1UsersMeProfileGet(options?: { [key: string]: any }) {
+  return request<API.ApiResponseDict_>('/api/v1/users/me/profile', {
+    method: 'GET',
+    ...(options || {}),
+  })
+}
+
+/** 获取实名认证状态 获取当前用户的实名认证状态
+
+返回用户是否已实名认证及相关信息 GET /api/v1/users/me/verification-status */
+export async function getVerificationStatusApiV1UsersMeVerificationStatusGet(options?: {
+  [key: string]: any
+}) {
+  return request<API.ApiResponseDict_>('/api/v1/users/me/verification-status', {
+    method: 'GET',
+    ...(options || {}),
+  })
+}

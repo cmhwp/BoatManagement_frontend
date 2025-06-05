@@ -1,6 +1,13 @@
 import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse } from 'axios'
 import { message } from 'ant-design-vue'
 
+// 扩展 AxiosRequestConfig 类型
+declare module 'axios' {
+  interface AxiosRequestConfig {
+    requestType?: 'form' | 'json'
+  }
+}
+
 // 请求响应接口
 interface ApiResponse<T = any> {
   code: number
@@ -26,6 +33,12 @@ request.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
+
+    // 处理 requestType
+    if (config.requestType === 'form') {
+      config.headers['Content-Type'] = 'multipart/form-data'
+    }
+
     return config
   },
   (error) => {

@@ -45,19 +45,28 @@
           </a-select>
         </a-col>
 
-        <!-- 搜索按钮 -->
-        <a-col :xs="24" :sm="12" :md="4" :lg="4">
+        <!-- 搜索和操作按钮 -->
+        <a-col :xs="24" :sm="12" :md="8" :lg="8">
           <a-space style="width: 100%">
             <a-button
               type="primary"
               @click="handleSearch"
               :loading="loading"
-              style="width: 100%"
             >
               <template #icon>
                 <SearchOutlined />
               </template>
               搜索
+            </a-button>
+            <a-button
+              v-if="actionConfig.showCreate"
+              type="primary"
+              @click="handleCreate"
+            >
+              <template #icon>
+                <PlusOutlined />
+              </template>
+              新建
             </a-button>
           </a-space>
         </a-col>
@@ -154,7 +163,7 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
 import { message } from 'ant-design-vue'
-import { DownOutlined, SearchOutlined, EyeOutlined, EditOutlined } from '@ant-design/icons-vue'
+import { DownOutlined, SearchOutlined, EyeOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons-vue'
 
 // Props定义
 interface SearchFilter {
@@ -170,6 +179,7 @@ interface SearchConfig {
 }
 
 interface ActionConfig {
+  showCreate?: boolean
   moreActions?: Array<{
     key: string
     label: string
@@ -208,6 +218,7 @@ const props = defineProps<{
 
 // Emits定义
 const emit = defineEmits<{
+  create: []
   view: [record: any]
   edit: [record: any]
   menuAction: [key: string, record: any]
@@ -301,10 +312,13 @@ const handleView = async (record: any) => {
         ? props.apiConfig.detailParams(record)
         : { id: record.id }
 
-      const response = await props.apiConfig.detail(params)
+                  const response = await props.apiConfig.detail(params)
+
       if (response.data?.success) {
         selectedRecord.value = response.data.data
         drawerVisible.value = true
+      } else {
+        message.error(response.data?.message || '获取详情失败')
       }
     } catch (error: any) {
       message.error(error.message || '获取详情失败')
@@ -315,6 +329,11 @@ const handleView = async (record: any) => {
   }
 
   emit('view', record)
+}
+
+// 处理创建
+const handleCreate = () => {
+  emit('create')
 }
 
 // 处理编辑

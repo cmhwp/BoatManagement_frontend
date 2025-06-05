@@ -38,6 +38,21 @@ export async function listAllUsersApiV1AdminUsersGet(
   })
 }
 
+/** Create New User 创建新用户（管理员） POST /api/v1/admin/users */
+export async function createNewUserApiV1AdminUsersPost(
+  body: API.UserCreate,
+  options?: { [key: string]: any }
+) {
+  return request<API.ApiResponseUserResponse_>('/api/v1/admin/users', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  })
+}
+
 /** Get User Detail 获取用户详情（管理员） GET /api/v1/admin/users/${param0} */
 export async function getUserDetailApiV1AdminUsersUserIdGet(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
@@ -71,6 +86,20 @@ export async function updateUserInfoApiV1AdminUsersUserIdPut(
   })
 }
 
+/** Delete User By Id 删除用户（管理员） DELETE /api/v1/admin/users/${param0} */
+export async function deleteUserByIdApiV1AdminUsersUserIdDelete(
+  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
+  params: API.deleteUserByIdApiV1AdminUsersUserIdDeleteParams,
+  options?: { [key: string]: any }
+) {
+  const { user_id: param0, ...queryParams } = params
+  return request<API.ApiResponseDict_>(`/api/v1/admin/users/${param0}`, {
+    method: 'DELETE',
+    params: { ...queryParams },
+    ...(options || {}),
+  })
+}
+
 /** Update User Role 更新用户角色（管理员） PUT /api/v1/admin/users/${param0}/role */
 export async function updateUserRoleApiV1AdminUsersUserIdRolePut(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
@@ -83,6 +112,20 @@ export async function updateUserRoleApiV1AdminUsersUserIdRolePut(
     params: {
       ...queryParams,
     },
+    ...(options || {}),
+  })
+}
+
+/** Soft Delete User 软删除用户（将状态设置为已删除）（管理员） POST /api/v1/admin/users/${param0}/soft-delete */
+export async function softDeleteUserApiV1AdminUsersUserIdSoftDeletePost(
+  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
+  params: API.softDeleteUserApiV1AdminUsersUserIdSoftDeletePostParams,
+  options?: { [key: string]: any }
+) {
+  const { user_id: param0, ...queryParams } = params
+  return request<API.ApiResponseUserResponse_>(`/api/v1/admin/users/${param0}/soft-delete`, {
+    method: 'POST',
+    params: { ...queryParams },
     ...(options || {}),
   })
 }
@@ -115,6 +158,48 @@ export async function verifyUserApiV1AdminUsersUserIdVerifyPut(
     params: {
       ...queryParams,
     },
+    ...(options || {}),
+  })
+}
+
+/** Batch User Operation 批量用户操作（管理员） POST /api/v1/admin/users/batch-operation */
+export async function batchUserOperationApiV1AdminUsersBatchOperationPost(
+  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
+  params: API.batchUserOperationApiV1AdminUsersBatchOperationPostParams,
+  options?: { [key: string]: any }
+) {
+  return request<API.ApiResponseDict_>('/api/v1/admin/users/batch-operation', {
+    method: 'POST',
+    params: {
+      ...params,
+    },
+    ...(options || {}),
+  })
+}
+
+/** Get Recent User Activities 获取最近用户活动统计（管理员） GET /api/v1/admin/users/recent-activities */
+export async function getRecentUserActivitiesApiV1AdminUsersRecentActivitiesGet(
+  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
+  params: API.getRecentUserActivitiesApiV1AdminUsersRecentActivitiesGetParams,
+  options?: { [key: string]: any }
+) {
+  return request<API.ApiResponseDictStr_Any_>('/api/v1/admin/users/recent-activities', {
+    method: 'GET',
+    params: {
+      // days has a default value: 7
+      days: '7',
+      ...params,
+    },
+    ...(options || {}),
+  })
+}
+
+/** Get User Status Summary 获取用户状态汇总（管理员） GET /api/v1/admin/users/status-summary */
+export async function getUserStatusSummaryApiV1AdminUsersStatusSummaryGet(options?: {
+  [key: string]: any
+}) {
+  return request<API.ApiResponseDictStr_Any_>('/api/v1/admin/users/status-summary', {
+    method: 'GET',
     ...(options || {}),
   })
 }

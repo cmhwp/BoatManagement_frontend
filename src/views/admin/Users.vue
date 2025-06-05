@@ -1,6 +1,7 @@
 <template>
   <div class="admin-users">
     <AdminTable
+      ref="adminTableRef"
       title="用户管理"
       subtitle="管理平台所有用户账户"
       :columns="columns"
@@ -8,6 +9,7 @@
       :action-config="actionConfig"
       :detail-config="detailConfig"
       :api-config="apiConfig"
+      @create="handleCreate"
       @edit="handleEdit"
       @menu-action="handleMenuAction"
     >
@@ -93,13 +95,235 @@
         </div>
       </template>
     </AdminTable>
+
+    <!-- 创建用户弹窗 -->
+    <a-modal
+      v-model:open="createModalVisible"
+      title="创建新用户"
+      width="600px"
+      @ok="handleCreateSubmit"
+      @cancel="createModalVisible = false"
+      :confirm-loading="createLoading"
+    >
+      <a-form
+        :model="createForm"
+        layout="vertical"
+        :label-col="{ span: 24 }"
+        :wrapper-col="{ span: 24 }"
+      >
+        <a-row :gutter="16">
+          <a-col :span="12">
+            <a-form-item label="用户名" required>
+              <a-input v-model:value="createForm.username" placeholder="请输入用户名" />
+            </a-form-item>
+          </a-col>
+          <a-col :span="12">
+            <a-form-item label="邮箱" required>
+              <a-input v-model:value="createForm.email" placeholder="请输入邮箱" />
+            </a-form-item>
+          </a-col>
+        </a-row>
+        <a-row :gutter="16">
+          <a-col :span="12">
+            <a-form-item label="密码" required>
+              <a-input-password v-model:value="createForm.password" placeholder="请输入密码" />
+            </a-form-item>
+          </a-col>
+          <a-col :span="12">
+            <a-form-item label="角色" required>
+              <a-select v-model:value="createForm.role" placeholder="请选择角色">
+                <a-select-option value="user">普通用户</a-select-option>
+                <a-select-option value="merchant">商家</a-select-option>
+                <a-select-option value="crew">船员</a-select-option>
+                <a-select-option value="admin">管理员</a-select-option>
+              </a-select>
+            </a-form-item>
+          </a-col>
+        </a-row>
+        <a-row :gutter="16">
+          <a-col :span="12">
+            <a-form-item label="真实姓名">
+              <a-input v-model:value="createForm.real_name" placeholder="请输入真实姓名" />
+            </a-form-item>
+          </a-col>
+          <a-col :span="12">
+            <a-form-item label="手机号">
+              <a-input v-model:value="createForm.phone" placeholder="请输入手机号" />
+            </a-form-item>
+          </a-col>
+        </a-row>
+        <a-row :gutter="16">
+          <a-col :span="12">
+            <a-form-item label="性别">
+              <a-select v-model:value="createForm.gender" placeholder="请选择性别" allow-clear>
+                <a-select-option value="male">男</a-select-option>
+                <a-select-option value="female">女</a-select-option>
+              </a-select>
+            </a-form-item>
+          </a-col>
+          <a-col :span="12">
+            <a-form-item label="地址">
+              <a-input v-model:value="createForm.address" placeholder="请输入地址" />
+            </a-form-item>
+          </a-col>
+        </a-row>
+      </a-form>
+    </a-modal>
+
+    <!-- 编辑用户弹窗 -->
+    <a-modal
+      v-model:open="editModalVisible"
+      title="编辑用户信息"
+      width="600px"
+      @ok="handleEditSubmit"
+      @cancel="editModalVisible = false"
+      :confirm-loading="editLoading"
+    >
+      <a-form
+        :model="editForm"
+        layout="vertical"
+        :label-col="{ span: 24 }"
+        :wrapper-col="{ span: 24 }"
+      >
+        <a-row :gutter="16">
+          <a-col :span="12">
+            <a-form-item label="用户名">
+              <a-input v-model:value="editForm.username" disabled placeholder="用户名不可修改" />
+            </a-form-item>
+          </a-col>
+          <a-col :span="12">
+            <a-form-item label="邮箱" required>
+              <a-input v-model:value="editForm.email" placeholder="请输入邮箱" />
+            </a-form-item>
+          </a-col>
+        </a-row>
+        <a-row :gutter="16">
+          <a-col :span="12">
+            <a-form-item label="真实姓名">
+              <a-input v-model:value="editForm.real_name" placeholder="请输入真实姓名" />
+            </a-form-item>
+          </a-col>
+          <a-col :span="12">
+            <a-form-item label="手机号">
+              <a-input v-model:value="editForm.phone" placeholder="请输入手机号" />
+            </a-form-item>
+          </a-col>
+        </a-row>
+        <a-row :gutter="16">
+          <a-col :span="12">
+            <a-form-item label="性别">
+              <a-select v-model:value="editForm.gender" placeholder="请选择性别" allow-clear>
+                <a-select-option value="male">男</a-select-option>
+                <a-select-option value="female">女</a-select-option>
+              </a-select>
+            </a-form-item>
+          </a-col>
+          <a-col :span="12">
+            <a-form-item label="地址">
+              <a-input v-model:value="editForm.address" placeholder="请输入地址" />
+            </a-form-item>
+          </a-col>
+        </a-row>
+      </a-form>
+    </a-modal>
+
+    <!-- 修改角色弹窗 -->
+    <a-modal
+      v-model:open="roleModalVisible"
+      title="修改用户角色"
+      @ok="handleRoleSubmit"
+      @cancel="roleModalVisible = false"
+    >
+      <a-form layout="vertical">
+        <a-form-item label="选择新角色" required>
+          <a-select v-model:value="roleForm.new_role" placeholder="请选择角色">
+            <a-select-option value="user">普通用户</a-select-option>
+            <a-select-option value="merchant">商家</a-select-option>
+            <a-select-option value="crew">船员</a-select-option>
+            <a-select-option value="admin">管理员</a-select-option>
+          </a-select>
+        </a-form-item>
+      </a-form>
+    </a-modal>
+
+    <!-- 修改状态弹窗 -->
+    <a-modal
+      v-model:open="statusModalVisible"
+      title="修改用户状态"
+      @ok="handleStatusSubmit"
+      @cancel="statusModalVisible = false"
+    >
+      <a-form layout="vertical">
+        <a-form-item label="选择新状态" required>
+          <a-select v-model:value="statusForm.new_status" placeholder="请选择状态">
+            <a-select-option value="active">活跃</a-select-option>
+            <a-select-option value="inactive">未激活</a-select-option>
+            <a-select-option value="suspended">已暂停</a-select-option>
+            <a-select-option value="deleted">已删除</a-select-option>
+          </a-select>
+        </a-form-item>
+      </a-form>
+    </a-modal>
   </div>
 </template>
 
 <script setup lang="ts">
-import { message } from 'ant-design-vue'
+import { ref, reactive } from 'vue'
+import { message, Modal } from 'ant-design-vue'
 import AdminTable from '@/components/AdminTable.vue'
-import { listAllUsersApiV1AdminUsersGet } from '@/services/api/admin'
+import {
+  listAllUsersApiV1AdminUsersGet,
+  createNewUserApiV1AdminUsersPost,
+  getUserDetailApiV1AdminUsersUserIdGet,
+  updateUserInfoApiV1AdminUsersUserIdPut,
+  deleteUserByIdApiV1AdminUsersUserIdDelete,
+  updateUserRoleApiV1AdminUsersUserIdRolePut,
+  updateUserStatusApiV1AdminUsersUserIdStatusPut
+} from '@/services/api/admin'
+
+// 组件状态
+const adminTableRef = ref<InstanceType<typeof AdminTable>>()
+const editModalVisible = ref(false)
+const createModalVisible = ref(false)
+const roleModalVisible = ref(false)
+const statusModalVisible = ref(false)
+const editLoading = ref(false)
+const createLoading = ref(false)
+const currentUser = ref<API.UserResponse | null>(null)
+
+// 编辑用户表单
+const editForm = reactive<API.UserUpdate>({
+  username: '',
+  email: '',
+  real_name: '',
+  phone: '',
+  gender: '',
+  address: ''
+})
+
+// 创建用户表单
+const createForm = reactive<API.UserCreate>({
+  username: '',
+  email: '',
+  password: '',
+  real_name: '',
+  phone: '',
+  gender: '',
+  address: '',
+  role: 'user'
+})
+
+// 角色更新表单
+const roleForm = reactive({
+  user_id: 0,
+  new_role: 'user' as API.UserRole
+})
+
+// 状态更新表单
+const statusForm = reactive({
+  user_id: 0,
+  new_status: 'active' as API.UserStatus
+})
 
 // 表格列配置
 const columns = [
@@ -172,10 +396,11 @@ const searchConfig = {
 
 // 操作配置
 const actionConfig = {
+  showCreate: true,
   moreActions: [
-    { key: 'resetPassword', label: '重置密码' },
-    { key: 'suspend', label: '暂停账户' },
-    { key: 'activate', label: '激活账户' }
+    { key: 'changeRole', label: '修改角色' },
+    { key: 'changeStatus', label: '修改状态' },
+    { key: 'delete', label: '删除用户', danger: true }
   ]
 }
 
@@ -189,31 +414,166 @@ const detailConfig = {
 // API配置
 const apiConfig = {
   list: listAllUsersApiV1AdminUsersGet,
+  detail: getUserDetailApiV1AdminUsersUserIdGet,
   listParams: (searchForm: any, pagination: any) => ({
     page: pagination.current,
     page_size: pagination.pageSize,
     search: searchForm.search || undefined,
     role: searchForm.role as API.UserRole || undefined,
     status: searchForm.status as API.UserStatus || undefined
-  })
+  }),
+  detailParams: (record: API.UserResponse) => ({ user_id: record.id })
 }
 
 // 处理编辑用户
 const handleEdit = (user: API.UserResponse) => {
-  message.info('编辑功能开发中...')
+  currentUser.value = user
+  Object.assign(editForm, {
+    username: user.username,
+    email: user.email,
+    real_name: user.real_name || '',
+    phone: user.phone || '',
+    gender: user.gender || '',
+    address: user.address || ''
+  })
+  editModalVisible.value = true
+}
+
+// 处理创建用户
+const handleCreate = () => {
+  Object.assign(createForm, {
+    username: '',
+    email: '',
+    password: '',
+    real_name: '',
+    phone: '',
+    gender: '',
+    address: '',
+    role: 'user'
+  })
+  createModalVisible.value = true
+}
+
+// 提交创建用户
+const handleCreateSubmit = async () => {
+  try {
+    createLoading.value = true
+    const response = await createNewUserApiV1AdminUsersPost(createForm)
+    if (response.data?.success) {
+      message.success('用户创建成功')
+      createModalVisible.value = false
+      adminTableRef.value?.refresh()
+    }
+  } catch (error: any) {
+    message.error(error.message || '创建用户失败')
+  } finally {
+    createLoading.value = false
+  }
+}
+
+// 提交编辑用户
+const handleEditSubmit = async () => {
+  if (!currentUser.value) return
+
+  try {
+    editLoading.value = true
+    const response = await updateUserInfoApiV1AdminUsersUserIdPut(
+      { user_id: currentUser.value.id },
+      editForm
+    )
+    if (response.data?.success) {
+      message.success('用户信息更新成功')
+      editModalVisible.value = false
+      adminTableRef.value?.refresh()
+    }
+  } catch (error: any) {
+    message.error(error.message || '更新用户信息失败')
+  } finally {
+    editLoading.value = false
+  }
+}
+
+// 处理角色更改
+const handleChangeRole = (user: API.UserResponse) => {
+  roleForm.user_id = user.id
+  roleForm.new_role = user.role
+  roleModalVisible.value = true
+}
+
+// 提交角色更改
+const handleRoleSubmit = async () => {
+  try {
+    const response = await updateUserRoleApiV1AdminUsersUserIdRolePut({
+      user_id: roleForm.user_id,
+      new_role: roleForm.new_role
+    })
+    if (response.data?.success) {
+      message.success('用户角色更新成功')
+      roleModalVisible.value = false
+      adminTableRef.value?.refresh()
+    }
+  } catch (error: any) {
+    message.error(error.message || '更新用户角色失败')
+  }
+}
+
+// 处理状态更改
+const handleChangeStatus = (user: API.UserResponse) => {
+  statusForm.user_id = user.id
+  statusForm.new_status = user.status
+  statusModalVisible.value = true
+}
+
+// 提交状态更改
+const handleStatusSubmit = async () => {
+  try {
+    const response = await updateUserStatusApiV1AdminUsersUserIdStatusPut({
+      user_id: statusForm.user_id,
+      new_status: statusForm.new_status
+    })
+    if (response.data?.success) {
+      message.success('用户状态更新成功')
+      statusModalVisible.value = false
+      adminTableRef.value?.refresh()
+    }
+  } catch (error: any) {
+    message.error(error.message || '更新用户状态失败')
+  }
+}
+
+// 处理删除用户
+const handleDelete = (user: API.UserResponse) => {
+  Modal.confirm({
+    title: '确认删除',
+    content: `确定要删除用户 "${user.username}" 吗？此操作不可恢复。`,
+    okType: 'danger',
+    onOk: async () => {
+      try {
+        const response = await deleteUserByIdApiV1AdminUsersUserIdDelete({
+          user_id: user.id
+        })
+        if (response.data?.success) {
+          message.success('用户删除成功')
+          adminTableRef.value?.refresh()
+        }
+      } catch (error: any) {
+        message.error(error.message || '删除用户失败')
+      }
+    }
+  })
 }
 
 // 处理菜单操作
 const handleMenuAction = (key: string, user: API.UserResponse) => {
   switch (key) {
-    case 'resetPassword':
-      message.info('重置密码功能开发中...')
+    case 'changeRole':
+      handleChangeRole(user)
       break
-    case 'suspend':
-      message.info('暂停账户功能开发中...')
+    case 'changeStatus':
+      handleChangeStatus(user)
       break
-    case 'activate':
-      message.info('激活账户功能开发中...')
+    case 'delete':
+      handleDelete(user)
       break
   }
 }

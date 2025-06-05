@@ -38,44 +38,6 @@
         </a-form-item>
 
         <a-form-item
-          label="真实姓名"
-          name="full_name"
-        >
-          <a-input
-            v-model:value="registerForm.real_name"
-            size="large"
-            placeholder="请输入真实姓名(可选)"
-          />
-        </a-form-item>
-
-        <a-form-item
-          label="手机号"
-          name="phone"
-        >
-          <a-input
-            v-model:value="registerForm.phone"
-            size="large"
-            placeholder="请输入手机号(可选)"
-            :prefix="h(PhoneOutlined)"
-          />
-        </a-form-item>
-
-        <a-form-item
-          label="角色"
-          name="role"
-        >
-          <a-select
-            v-model:value="registerForm.role"
-            size="large"
-            placeholder="请选择角色"
-          >
-            <a-select-option value="user">普通用户</a-select-option>
-            <a-select-option value="merchant">商家</a-select-option>
-            <a-select-option value="crew">船员</a-select-option>
-          </a-select>
-        </a-form-item>
-
-        <a-form-item
           label="密码"
           name="password"
         >
@@ -92,7 +54,7 @@
           name="confirmPassword"
         >
           <a-input-password
-            v-model:value="confirmPassword"
+            v-model:value="registerForm.confirmPassword"
             size="large"
             placeholder="请再次输入密码"
             :prefix="h(LockOutlined)"
@@ -139,24 +101,20 @@ import { message } from 'ant-design-vue'
 import {
   UserOutlined,
   LockOutlined,
-  MailOutlined,
-  PhoneOutlined
+  MailOutlined
 } from '@ant-design/icons-vue'
-import { registerApiV1AuthRegisterPost } from '@/services/api/renzheng'
+import { registerApiV1AuthRegisterPost } from '@/services/api/auth'
 
 const router = useRouter()
 
 // 表单数据
-const registerForm = reactive<API.UserCreate>({
+const registerForm = reactive<API.UserCreate & { confirmPassword: string }>({
   username: '',
   email: '',
   password: '',
-  real_name: '',
-  phone: '',
+  confirmPassword: '',
   role: 'user' as API.UserRole
 })
-
-const confirmPassword = ref('')
 const agreeTerms = ref(false)
 const loading = ref(false)
 
@@ -171,19 +129,22 @@ const rules = {
     { required: true, message: '请输入邮箱', trigger: 'blur' },
     { type: 'email', message: '邮箱格式不正确', trigger: 'blur' }
   ],
-  full_name: [
-    { max: 50, message: '姓名长度不能超过50个字符', trigger: 'blur' }
-  ],
-  phone: [
-    { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号', trigger: 'blur' }
-  ],
-  role: [
-    { required: true, message: '请选择角色', trigger: 'change' }
-  ],
   password: [
     { required: true, message: '请输入密码', trigger: 'blur' },
     { min: 6, message: '密码至少6位', trigger: 'blur' },
     { pattern: /^(?=.*[a-zA-Z])(?=.*\d)/, message: '密码必须包含字母和数字', trigger: 'blur' }
+  ],
+  confirmPassword: [
+    { required: true, message: '请确认密码', trigger: 'blur' },
+    {
+      validator: (_rule: any, value: string) => {
+        if (value && value !== registerForm.password) {
+          return Promise.reject('两次输入的密码不一致')
+        }
+        return Promise.resolve()
+      },
+      trigger: 'blur'
+    }
   ]
 }
 
@@ -192,15 +153,18 @@ const handleRegister = async () => {
   try {
     loading.value = true
 
-    // 清理空字段
-    const formData = { ...registerForm }
-    if (!formData.real_name) delete formData.real_name
-    if (!formData.phone) delete formData.phone
+    // 验证密码确认
+    if (registerForm.password !== registerForm.confirmPassword) {
+      message.error('两次输入的密码不一致')
+      return
+    }
 
-    const response = await registerApiV1AuthRegisterPost(formData)
+    // 创建注册数据，移除确认密码字段
+    const { confirmPassword, ...registerData } = registerForm
+    const response = await registerApiV1AuthRegisterPost(registerData)
 
     if (response.data?.success) {
-      message.success('注册成功，请登录')
+      message.success('注册成功！您已成为普通用户，如需申请其他角色请前往个人中心')
       await router.push('/login')
     } else {
       message.error(response.data?.message || '注册失败')
@@ -279,5 +243,10 @@ const handleRegister = async () => {
 
 .terms-link:hover {
   text-decoration: underline;
+}
+
+.role-notice {
+  margin-top: 16px;
+  text-align: center;
 }
 </style>

@@ -20,6 +20,15 @@ declare namespace API {
     data?: CrewResponse | null
   }
 
+  type ApiResponseDict_ = {
+    /** Success */
+    success?: boolean
+    /** Message */
+    message?: string
+    /** Data */
+    data?: Record<string, any> | null
+  }
+
   type ApiResponseDictStr_Any_ = {
     /** Success */
     success?: boolean
@@ -27,6 +36,14 @@ declare namespace API {
     message?: string
     /** Data */
     data?: Record<string, any> | null
+  }
+
+  type ApiResponseIdentityVerificationResponse_ = {
+    /** Success */
+    success?: boolean
+    /** Message */
+    message?: string
+    data?: IdentityVerificationResponse | null
   }
 
   type ApiResponseMerchantResponse_ = {
@@ -53,12 +70,27 @@ declare namespace API {
     data?: Token | null
   }
 
+  type ApiResponseUnionIdentityVerificationResponse_NoneType_ = {
+    /** Success */
+    success?: boolean
+    /** Message */
+    message?: string
+    data?: IdentityVerificationResponse | null
+  }
+
   type ApiResponseUserResponse_ = {
     /** Success */
     success?: boolean
     /** Message */
     message?: string
     data?: UserResponse | null
+  }
+
+  type batchUserOperationApiV1AdminUsersBatchOperationPostParams = {
+    /** 用户ID列表 */
+    user_ids: number[]
+    /** 操作类型: activate, suspend, soft_delete */
+    operation: string
   }
 
   type BoatCreate = {
@@ -208,6 +240,41 @@ declare namespace API {
     is_available?: boolean | null
   }
 
+  type BodyUploadAvatarApiV1UploadAvatarPost = {
+    /** File 头像文件 */
+    file: string
+  }
+
+  type BodyUploadBoatImagesApiV1UploadBoatImagesPost = {
+    /** Files 船艇图片列表 */
+    files: string[]
+  }
+
+  type BodyUploadIdentityBackImageApiV1UploadIdentityBackPost = {
+    /** File 身份证背面照片 */
+    file: string
+  }
+
+  type BodyUploadIdentityFrontImageApiV1UploadIdentityFrontPost = {
+    /** File 身份证正面照片 */
+    file: string
+  }
+
+  type BodyUploadProductImagesApiV1UploadProductImagesPost = {
+    /** Files 产品图片列表 */
+    files: string[]
+  }
+
+  type BodyUploadReviewImagesApiV1UploadReviewImagesPost = {
+    /** Files 评价图片列表 */
+    files: string[]
+  }
+
+  type BodyUploadServiceImagesApiV1UploadServiceImagesPost = {
+    /** Files 服务图片列表 */
+    files: string[]
+  }
+
   type CrewCreate = {
     /** Id Card No */
     id_card_no: string
@@ -321,8 +388,16 @@ declare namespace API {
     crew_id: number
   }
 
+  type deleteFileApiV1UploadFileDeleteParams = {
+    file_url: string
+  }
+
   type deleteMerchantInfoApiV1MerchantsMerchantIdDeleteParams = {
     merchant_id: number
+  }
+
+  type deleteUserByIdApiV1AdminUsersUserIdDeleteParams = {
+    user_id: number
   }
 
   type getBoatDetailApiV1BoatsBoatIdGetParams = {
@@ -333,8 +408,30 @@ declare namespace API {
     crew_id: number
   }
 
+  type getFileInfoApiV1UploadFileInfoGetParams = {
+    file_url: string
+  }
+
+  type getIdentityVerificationApiV1IdentityVerificationVerificationIdGetParams = {
+    verification_id: number
+  }
+
+  type getIdentityVerificationsApiV1IdentityVerificationGetParams = {
+    /** 跳过记录数 */
+    skip?: number
+    /** 每页记录数 */
+    limit?: number
+    /** 认证状态筛选 */
+    status?: VerificationStatus | null
+  }
+
   type getMerchantDetailApiV1MerchantsMerchantIdGetParams = {
     merchant_id: number
+  }
+
+  type getRecentUserActivitiesApiV1AdminUsersRecentActivitiesGetParams = {
+    /** 查询最近天数 */
+    days?: number
   }
 
   type getUserDetailApiV1AdminUsersUserIdGetParams = {
@@ -348,6 +445,89 @@ declare namespace API {
   type HTTPValidationError = {
     /** Detail */
     detail?: ValidationError[]
+  }
+
+  type IdentityType = 'id_card' | 'passport' | 'driver_license' | 'other'
+
+  type IdentityVerificationCreate = {
+    /** Real Name 真实姓名 */
+    real_name: string
+    /** 证件类型 */
+    identity_type?: IdentityType
+    /** Identity Number 证件号码 */
+    identity_number: string
+    /** Front Image 证件正面照片URL */
+    front_image?: string | null
+    /** Back Image 证件背面照片URL */
+    back_image?: string | null
+  }
+
+  type IdentityVerificationResponse = {
+    /** Id */
+    id: number
+    /** User Id */
+    user_id: number
+    /** Real Name */
+    real_name: string
+    identity_type: IdentityType
+    /** Identity Number */
+    identity_number: string
+    /** Front Image */
+    front_image?: string | null
+    /** Back Image */
+    back_image?: string | null
+    status: VerificationStatus
+    /** Reject Reason */
+    reject_reason?: string | null
+    /** Verified At */
+    verified_at?: string | null
+    /** Expires At */
+    expires_at?: string | null
+    /** Reviewer Id */
+    reviewer_id?: number | null
+    /** Reviewed At */
+    reviewed_at?: string | null
+    /** Created At */
+    created_at: string
+    /** Updated At */
+    updated_at: string
+  }
+
+  type IdentityVerificationReview = {
+    /** 审核状态 */
+    status: VerificationStatus
+    /** Reject Reason 拒绝原因 */
+    reject_reason?: string | null
+    /** Expires At 认证过期时间 */
+    expires_at?: string | null
+  }
+
+  type IdentityVerificationSummary = {
+    /** Id */
+    id: number
+    /** User Id */
+    user_id: number
+    /** Real Name */
+    real_name: string
+    identity_type: IdentityType
+    status: VerificationStatus
+    /** Created At */
+    created_at: string
+    /** Reviewed At */
+    reviewed_at?: string | null
+  }
+
+  type IdentityVerificationUpdate = {
+    /** Real Name 真实姓名 */
+    real_name?: string | null
+    /** 证件类型 */
+    identity_type?: IdentityType | null
+    /** Identity Number 证件号码 */
+    identity_number?: string | null
+    /** Front Image 证件正面照片URL */
+    front_image?: string | null
+    /** Back Image 证件背面照片URL */
+    back_image?: string | null
   }
 
   type listAllUsersApiV1AdminUsersGetParams = {
@@ -575,6 +755,19 @@ declare namespace API {
     pages: number
   }
 
+  type PaginatedResponseIdentityVerificationSummary_ = {
+    /** Items */
+    items: IdentityVerificationSummary[]
+    /** Total */
+    total: number
+    /** Page */
+    page: number
+    /** Page Size */
+    page_size: number
+    /** Pages */
+    pages: number
+  }
+
   type PaginatedResponseMerchantListResponse_ = {
     /** Items */
     items: MerchantListResponse[]
@@ -599,6 +792,14 @@ declare namespace API {
     page_size: number
     /** Pages */
     pages: number
+  }
+
+  type reviewIdentityVerificationApiV1IdentityVerificationVerificationIdReviewPostParams = {
+    verification_id: number
+  }
+
+  type softDeleteUserApiV1AdminUsersUserIdSoftDeletePostParams = {
+    user_id: number
   }
 
   type Token = {
@@ -748,6 +949,8 @@ declare namespace API {
     /** Error Type */
     type: string
   }
+
+  type VerificationStatus = 'pending' | 'approved' | 'rejected' | 'expired'
 
   type verifyMerchantInfoApiV1MerchantsMerchantIdVerifyPostParams = {
     merchant_id: number
