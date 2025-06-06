@@ -6,252 +6,258 @@
     </div>
 
     <a-row :gutter="[24, 24]">
-      <!-- 左侧内容 -->
+      <!-- 左侧标签页内容 -->
       <a-col :xs="24" :lg="16">
-        <!-- 基本信息卡片 -->
-        <a-card title="基本信息" class="profile-card">
-          <a-form
-            :model="profileForm"
-            :rules="profileRules"
-            layout="vertical"
-            @finish="handleUpdateProfile"
-          >
-            <a-row :gutter="16">
-              <a-col :xs="24" :sm="12">
-                <a-form-item label="用户名" name="username">
-                  <a-input
-                    v-model:value="profileForm.username"
-                    disabled
-                    placeholder="用户名不可修改"
-                  />
-                </a-form-item>
-              </a-col>
-
-              <a-col :xs="24" :sm="12">
-                <a-form-item label="邮箱" name="email">
-                  <a-input
-                    v-model:value="profileForm.email"
-                    placeholder="请输入邮箱"
-                  />
-                </a-form-item>
-              </a-col>
-            </a-row>
-
-            <a-row :gutter="16">
-              <a-col :xs="24" :sm="12">
-                <a-form-item label="真实姓名" name="real_name">
-                  <a-input
-                    v-model:value="profileForm.real_name"
-                    placeholder="请输入真实姓名"
-                  />
-                </a-form-item>
-              </a-col>
-
-              <a-col :xs="24" :sm="12">
-                <a-form-item label="手机号" name="phone">
-                  <a-input
-                    v-model:value="profileForm.phone"
-                    placeholder="请输入手机号"
-                  />
-                </a-form-item>
-              </a-col>
-            </a-row>
-
-            <a-form-item>
-              <a-space>
-                <a-button
-                  type="primary"
-                  html-type="submit"
-                  :loading="updateLoading"
-                >
-                  保存修改
-                </a-button>
-                <a-button @click="handleReset">
-                  重置
-                </a-button>
-              </a-space>
-            </a-form-item>
-          </a-form>
-        </a-card>
-
-        <!-- 实名认证卡片 -->
-        <a-card title="实名认证" class="profile-card">
-          <template #extra>
-            <a-tag
-              :color="getVerificationStatusColor(verificationInfo?.status)"
-              style="margin: 0;"
-            >
-              {{ getVerificationStatusText(verificationInfo?.status) }}
-            </a-tag>
-          </template>
-
-          <div v-if="!verificationInfo" class="verification-empty">
-            <a-empty
-              description="您还未提交实名认证申请"
-              :image="$emptyImage"
-            >
-              <a-button
-                type="primary"
-                @click="handleStartVerification"
-                :loading="verificationLoading"
+        <a-card class="tabs-card">
+          <a-tabs v-model:activeKey="activeTab" type="card">
+            <!-- 基本信息 -->
+            <a-tab-pane key="profile" tab="基本信息">
+              <a-form
+                :model="profileForm"
+                :rules="profileRules"
+                layout="vertical"
+                @finish="handleUpdateProfile"
               >
-                <IdcardOutlined />
-                开始实名认证
-              </a-button>
-            </a-empty>
-          </div>
+                <a-row :gutter="16">
+                  <a-col :xs="24" :sm="12">
+                    <a-form-item label="用户名" name="username">
+                      <a-input
+                        v-model:value="profileForm.username"
+                        disabled
+                        placeholder="用户名不可修改"
+                      />
+                    </a-form-item>
+                  </a-col>
 
-          <div v-else class="verification-content">
-            <a-descriptions :column="1" bordered size="small">
-              <a-descriptions-item label="真实姓名">
-                {{ verificationInfo.real_name }}
-              </a-descriptions-item>
-              <a-descriptions-item label="证件类型">
-                {{ getIdentityTypeText(verificationInfo.identity_type) }}
-              </a-descriptions-item>
-              <a-descriptions-item label="证件号码">
-                {{ maskIdentityNumber(verificationInfo.identity_number) }}
-              </a-descriptions-item>
-              <a-descriptions-item label="提交时间">
-                {{ formatDate(verificationInfo.created_at) }}
-              </a-descriptions-item>
-              <a-descriptions-item v-if="verificationInfo.reviewed_at" label="审核时间">
-                {{ formatDate(verificationInfo.reviewed_at) }}
-              </a-descriptions-item>
-              <a-descriptions-item v-if="verificationInfo.verified_at" label="认证时间">
-                {{ formatDate(verificationInfo.verified_at) }}
-              </a-descriptions-item>
-              <a-descriptions-item v-if="verificationInfo.expires_at" label="有效期至">
-                {{ formatDate(verificationInfo.expires_at) }}
-              </a-descriptions-item>
-              <a-descriptions-item v-if="verificationInfo.reject_reason" label="拒绝原因">
-                <span style="color: #ff4d4f;">{{ verificationInfo.reject_reason }}</span>
-              </a-descriptions-item>
-            </a-descriptions>
+                  <a-col :xs="24" :sm="12">
+                    <a-form-item label="邮箱" name="email">
+                      <a-input
+                        v-model:value="profileForm.email"
+                        placeholder="请输入邮箱"
+                      />
+                    </a-form-item>
+                  </a-col>
+                </a-row>
 
-            <div class="verification-actions" style="margin-top: 16px;">
-              <a-space>
-                <a-button
-                  v-if="verificationInfo.status === 'pending'"
-                  @click="handleEditVerification"
-                  :loading="verificationLoading"
-                >
-                  <EditOutlined />
-                  修改认证信息
-                </a-button>
-                <a-button
-                  v-if="verificationInfo.status === 'rejected'"
-                  type="primary"
-                  @click="handleResubmitVerification"
-                  :loading="verificationLoading"
-                >
-                  <ReloadOutlined />
-                  重新提交认证
-                </a-button>
-                <a-button
-                  v-if="verificationInfo.status === 'approved'"
-                  type="primary"
-                  ghost
-                  disabled
-                >
-                  <CheckCircleOutlined />
-                  认证已通过
-                </a-button>
-              </a-space>
-            </div>
-          </div>
-        </a-card>
+                <a-row :gutter="16">
+                  <a-col :xs="24" :sm="12">
+                    <a-form-item label="真实姓名" name="real_name">
+                      <a-input
+                        v-model:value="profileForm.real_name"
+                        placeholder="请输入真实姓名"
+                      />
+                    </a-form-item>
+                  </a-col>
 
-        <!-- 角色申请卡片 -->
-        <a-card title="角色申请" class="profile-card">
-          <div class="role-application">
-            <a-alert
-              message="角色申请说明"
-              description="普通用户可以申请成为商家或船员。申请时需要完成实名认证，并提供相关资质证明。"
-              type="info"
-              show-icon
-              style="margin-bottom: 16px;"
-            />
+                  <a-col :xs="24" :sm="12">
+                    <a-form-item label="手机号" name="phone">
+                      <a-input
+                        v-model:value="profileForm.phone"
+                        placeholder="请输入手机号"
+                      />
+                    </a-form-item>
+                  </a-col>
+                </a-row>
 
-            <a-row :gutter="16">
-              <a-col :xs="24" :sm="12">
-                <a-card size="small" class="role-card">
-                  <div class="role-content">
-                    <ShopOutlined class="role-icon" />
-                    <h4>商家认证</h4>
-                    <p>申请成为船艇服务商家，可以发布船艇信息并接受预订</p>
+                <a-form-item>
+                  <a-space>
                     <a-button
                       type="primary"
-                      block
-                      :disabled="!userStore.user?.is_verified || userStore.user?.role !== 'user'"
-                      @click="handleApplyMerchant"
+                      html-type="submit"
+                      :loading="updateLoading"
                     >
-                      {{ userStore.user?.role === 'merchant' ? '已是商家' : '申请商家认证' }}
+                      保存修改
                     </a-button>
-                  </div>
-                </a-card>
-              </a-col>
+                    <a-button @click="handleReset">
+                      重置
+                    </a-button>
+                  </a-space>
+                </a-form-item>
+              </a-form>
+            </a-tab-pane>
 
-              <a-col :xs="24" :sm="12">
-                <a-card size="small" class="role-card">
-                  <div class="role-content">
-                    <TeamOutlined class="role-icon" />
-                    <h4>船员认证</h4>
-                    <p>申请成为专业船员，可以为船艇服务提供专业操作</p>
+            <!-- 实名认证 -->
+            <a-tab-pane key="verification" tab="实名认证">
+              <div class="verification-status">
+                <a-tag
+                  :color="getVerificationStatusColor(verificationInfo?.status)"
+                  style="margin-bottom: 16px;"
+                >
+                  {{ getVerificationStatusText(verificationInfo?.status) }}
+                </a-tag>
+              </div>
+
+              <div v-if="!verificationInfo" class="verification-empty">
+                <a-empty
+                  description="您还未提交实名认证申请"
+                >
+                  <a-button
+                    type="primary"
+                    @click="handleStartVerification"
+                    :loading="verificationLoading"
+                  >
+                    <IdcardOutlined />
+                    开始实名认证
+                  </a-button>
+                </a-empty>
+              </div>
+
+              <div v-else class="verification-content">
+                <a-descriptions :column="1" bordered size="small">
+                  <a-descriptions-item label="真实姓名">
+                    {{ verificationInfo.real_name }}
+                  </a-descriptions-item>
+                  <a-descriptions-item label="证件类型">
+                    {{ getIdentityTypeText(verificationInfo.identity_type) }}
+                  </a-descriptions-item>
+                  <a-descriptions-item label="证件号码">
+                    {{ maskIdentityNumber(verificationInfo.identity_number) }}
+                  </a-descriptions-item>
+                  <a-descriptions-item label="提交时间">
+                    {{ formatDate(verificationInfo.created_at) }}
+                  </a-descriptions-item>
+                  <a-descriptions-item v-if="verificationInfo.reviewed_at" label="审核时间">
+                    {{ formatDate(verificationInfo.reviewed_at) }}
+                  </a-descriptions-item>
+                  <a-descriptions-item v-if="verificationInfo.verified_at" label="认证时间">
+                    {{ formatDate(verificationInfo.verified_at) }}
+                  </a-descriptions-item>
+                  <a-descriptions-item v-if="verificationInfo.expires_at" label="有效期至">
+                    {{ formatDate(verificationInfo.expires_at) }}
+                  </a-descriptions-item>
+                  <a-descriptions-item v-if="verificationInfo.reject_reason" label="拒绝原因">
+                    <span style="color: #ff4d4f;">{{ verificationInfo.reject_reason }}</span>
+                  </a-descriptions-item>
+                </a-descriptions>
+
+                <div class="verification-actions" style="margin-top: 16px;">
+                  <a-space>
+                    <a-button
+                      v-if="verificationInfo.status === 'pending'"
+                      @click="handleEditVerification"
+                      :loading="verificationLoading"
+                    >
+                      <EditOutlined />
+                      修改认证信息
+                    </a-button>
+                    <a-button
+                      v-if="verificationInfo.status === 'rejected'"
+                      type="primary"
+                      @click="handleResubmitVerification"
+                      :loading="verificationLoading"
+                    >
+                      <ReloadOutlined />
+                      重新提交认证
+                    </a-button>
+                    <a-button
+                      v-if="verificationInfo.status === 'approved'"
+                      type="primary"
+                      ghost
+                      disabled
+                    >
+                      <CheckCircleOutlined />
+                      认证已通过
+                    </a-button>
+                  </a-space>
+                </div>
+              </div>
+            </a-tab-pane>
+
+            <!-- 角色申请 -->
+            <a-tab-pane key="role" tab="角色申请">
+              <div class="role-application">
+                <a-alert
+                  message="角色申请说明"
+                  description="普通用户可以申请成为商家或船员。申请时需要完成实名认证，并提供相关资质证明。"
+                  type="info"
+                  show-icon
+                  style="margin-bottom: 24px;"
+                />
+
+                <a-row :gutter="16">
+                  <a-col :xs="24" :sm="12">
+                    <a-card size="small" class="role-card">
+                      <div class="role-content">
+                        <ShopOutlined class="role-icon" />
+                        <h4>商家认证</h4>
+                        <p>申请成为船艇服务商家，可以发布船艇信息并接受预订</p>
+                        <a-button
+                          type="primary"
+                          block
+                          :disabled="!userStore.user?.is_verified || userStore.user?.role !== 'user'"
+                          @click="handleApplyMerchant"
+                        >
+                          {{ userStore.user?.role === 'merchant' ? '已是商家' : '申请商家认证' }}
+                        </a-button>
+                      </div>
+                    </a-card>
+                  </a-col>
+
+                  <a-col :xs="24" :sm="12">
+                    <a-card size="small" class="role-card">
+                      <div class="role-content">
+                        <TeamOutlined class="role-icon" />
+                        <h4>船员认证</h4>
+                        <p>申请成为专业船员，可以为船艇服务提供专业操作</p>
+                        <a-button
+                          type="primary"
+                          block
+                          :disabled="!userStore.user?.is_verified || userStore.user?.role !== 'user'"
+                          @click="handleApplyCrew"
+                        >
+                          {{ userStore.user?.role === 'crew' ? '已是船员' : '申请船员认证' }}
+                        </a-button>
+                      </div>
+                    </a-card>
+                  </a-col>
+                </a-row>
+              </div>
+            </a-tab-pane>
+
+            <!-- 修改密码 -->
+            <a-tab-pane key="password" tab="修改密码">
+              <div class="password-form-container">
+                <a-form
+                  :model="passwordForm"
+                  :rules="passwordRules"
+                  layout="vertical"
+                  @finish="handleChangePassword"
+                  style="max-width: 500px; margin: 0 auto;"
+                >
+                  <a-form-item label="当前密码" name="old_password">
+                    <a-input-password
+                      v-model:value="passwordForm.old_password"
+                      placeholder="请输入当前密码"
+                    />
+                  </a-form-item>
+
+                  <a-form-item label="新密码" name="new_password">
+                    <a-input-password
+                      v-model:value="passwordForm.new_password"
+                      placeholder="请输入新密码"
+                    />
+                  </a-form-item>
+
+                  <a-form-item label="确认新密码" name="confirm_password">
+                    <a-input-password
+                      v-model:value="passwordForm.confirm_password"
+                      placeholder="请再次输入新密码"
+                    />
+                  </a-form-item>
+
+                  <a-form-item>
                     <a-button
                       type="primary"
-                      block
-                      :disabled="!userStore.user?.is_verified || userStore.user?.role !== 'user'"
-                      @click="handleApplyCrew"
+                      html-type="submit"
+                      :loading="passwordLoading"
                     >
-                      {{ userStore.user?.role === 'crew' ? '已是船员' : '申请船员认证' }}
+                      修改密码
                     </a-button>
-                  </div>
-                </a-card>
-              </a-col>
-            </a-row>
-          </div>
-        </a-card>
-
-        <!-- 修改密码 -->
-        <a-card title="修改密码" class="profile-card">
-          <a-form
-            :model="passwordForm"
-            :rules="passwordRules"
-            layout="vertical"
-            @finish="handleChangePassword"
-          >
-            <a-form-item label="当前密码" name="old_password">
-              <a-input-password
-                v-model:value="passwordForm.old_password"
-                placeholder="请输入当前密码"
-              />
-            </a-form-item>
-
-            <a-form-item label="新密码" name="new_password">
-              <a-input-password
-                v-model:value="passwordForm.new_password"
-                placeholder="请输入新密码"
-              />
-            </a-form-item>
-
-            <a-form-item label="确认新密码" name="confirm_password">
-              <a-input-password
-                v-model:value="passwordForm.confirm_password"
-                placeholder="请再次输入新密码"
-              />
-            </a-form-item>
-
-            <a-form-item>
-              <a-button
-                type="primary"
-                html-type="submit"
-                :loading="passwordLoading"
-              >
-                修改密码
-              </a-button>
-            </a-form-item>
-          </a-form>
+                  </a-form-item>
+                </a-form>
+              </div>
+            </a-tab-pane>
+          </a-tabs>
         </a-card>
       </a-col>
 
@@ -259,17 +265,22 @@
       <a-col :xs="24" :lg="8">
         <a-card class="user-info-card">
           <div class="user-avatar-section">
-            <a-avatar
-              :size="80"
-              :src="userStore.user?.avatar"
-              class="user-avatar"
-            >
-              {{ userStore.user?.username?.charAt(0).toUpperCase() }}
-            </a-avatar>
+            <div class="avatar-container">
+              <a-avatar
+                :size="80"
+                :src="userStore.user?.avatar"
+                class="user-avatar"
+              >
+                {{ userStore.user?.username?.charAt(0).toUpperCase() }}
+              </a-avatar>
+              <div v-if="avatarUploading" class="avatar-loading">
+                <a-spin size="small" />
+              </div>
+            </div>
             <div class="user-info">
               <h3>{{ userStore.user?.real_name || userStore.user?.username }}</h3>
-              <a-tag :color="getRoleColor(userStore.user?.role)">
-                {{ getRoleText(userStore.user?.role) }}
+              <a-tag :color="getRoleColor(userStore.user?.role || 'user')">
+                {{ getRoleText(userStore.user?.role || 'user') }}
               </a-tag>
               <div class="verification-badge">
                 <a-tag
@@ -290,8 +301,14 @@
                 </a-tag>
               </div>
             </div>
-            <a-button type="link" size="small" @click="handleAvatarUpload">
-              更换头像
+            <a-button
+              type="link"
+              size="small"
+              @click="handleAvatarUpload"
+              :loading="avatarUploading"
+              :disabled="avatarUploading"
+            >
+              {{ avatarUploading ? '上传中...' : '更换头像' }}
             </a-button>
           </div>
 
@@ -307,45 +324,12 @@
                 {{ userStore.user?.last_login_at ? formatDate(userStore.user.last_login_at) : '当前会话' }}
               </a-descriptions-item>
               <a-descriptions-item label="账户状态">
-                <a-tag :color="getStatusColor(userStore.user?.status)">
-                  {{ getStatusText(userStore.user?.status) }}
+                <a-tag :color="getStatusColor(userStore.user?.status || 'active')">
+                  {{ getStatusText(userStore.user?.status || 'active') }}
                 </a-tag>
               </a-descriptions-item>
             </a-descriptions>
           </div>
-        </a-card>
-
-        <!-- 快捷操作 -->
-        <a-card title="快捷操作" class="quick-actions-card">
-          <a-space direction="vertical" style="width: 100%">
-            <a-button
-              v-if="userStore.isMerchant"
-              block
-              @click="handleGoToMerchant"
-            >
-              <ShopOutlined />
-              商家中心
-            </a-button>
-
-            <a-button
-              v-if="userStore.isCrew"
-              block
-              @click="handleGoToCrew"
-            >
-              <TeamOutlined />
-              船员中心
-            </a-button>
-
-            <a-button block @click="handleGoToBookings">
-              <CalendarOutlined />
-              我的预订
-            </a-button>
-
-            <a-button block @click="handleGoToHelp">
-              <QuestionCircleOutlined />
-              帮助中心
-            </a-button>
-          </a-space>
         </a-card>
       </a-col>
     </a-row>
@@ -434,8 +418,6 @@ import { message } from 'ant-design-vue'
 import {
   ShopOutlined,
   TeamOutlined,
-  CalendarOutlined,
-  QuestionCircleOutlined,
   IdcardOutlined,
   EditOutlined,
   ReloadOutlined,
@@ -452,11 +434,15 @@ import {
 } from '@/services/api/identity'
 import {
   uploadIdentityFrontImageApiV1UploadIdentityFrontPost,
-  uploadIdentityBackImageApiV1UploadIdentityBackPost
+  uploadIdentityBackImageApiV1UploadIdentityBackPost,
+  uploadAvatarApiV1UploadAvatarPost
 } from '@/services/api/upload'
 
 const router = useRouter()
 const userStore = useUserStore()
+
+// 当前激活的标签页
+const activeTab = ref('profile')
 
 // 加载状态
 const updateLoading = ref(false)
@@ -496,10 +482,11 @@ const verificationForm = reactive<API.IdentityVerificationCreate>({
 })
 
 // 图片上传
-const frontImageList = ref([])
-const backImageList = ref([])
+const frontImageList = ref<any[]>([])
+const backImageList = ref<any[]>([])
 const frontImageUploading = ref(false)
 const backImageUploading = ref(false)
+const avatarUploading = ref(false)
 
 // 表单验证规则
 const profileRules = {
@@ -565,7 +552,7 @@ const initFormData = () => {
 const loadVerificationInfo = async () => {
   try {
     const response = await getMyIdentityVerificationApiV1IdentityVerificationMeGet()
-    if (response.data?.success) {
+    if (response.data?.success && response.data.data) {
       verificationInfo.value = response.data.data
     }
   } catch (error: any) {
@@ -674,7 +661,7 @@ const handleVerificationSubmit = async () => {
     if (isEditingVerification.value) {
       // 更新实名认证信息
       const response = await updateMyIdentityVerificationApiV1IdentityVerificationMePut(verificationForm)
-      if (response.data?.success) {
+      if (response.data?.success && response.data.data) {
         message.success('实名认证信息更新成功')
         verificationInfo.value = response.data.data
         verificationModalVisible.value = false
@@ -682,7 +669,7 @@ const handleVerificationSubmit = async () => {
     } else {
       // 创建实名认证申请
       const response = await createIdentityVerificationApiV1IdentityVerificationPost(verificationForm)
-      if (response.data?.success) {
+      if (response.data?.success && response.data.data) {
         message.success('实名认证申请提交成功，请等待审核')
         verificationInfo.value = response.data.data
         verificationModalVisible.value = false
@@ -749,11 +736,9 @@ const handleFrontUpload = async (options: any) => {
     frontImageUploading.value = true
     onProgress({ percent: 50 })
 
-    // 直接传递文件对象，不传body参数
-    const response = await uploadIdentityFrontImageApiV1UploadIdentityFrontPost(
-      {},  // 空的body对象
-      file // 实际文件对象
-    )
+    const response = await uploadIdentityFrontImageApiV1UploadIdentityFrontPost({
+      file: file
+    })
     console.log(response)
     if (response.data?.success && response.data.data?.image_url) {
       verificationForm.front_image = response.data.data.image_url
@@ -778,11 +763,9 @@ const handleBackUpload = async (options: any) => {
     backImageUploading.value = true
     onProgress({ percent: 50 })
 
-    // 直接传递文件对象，不传body参数
-    const response = await uploadIdentityBackImageApiV1UploadIdentityBackPost(
-      {},  // 空的body对象
-      file // 实际文件对象
-    )
+    const response = await uploadIdentityBackImageApiV1UploadIdentityBackPost({
+      file: file
+    })
 
     if (response.data?.success && response.data.data?.image_url) {
       verificationForm.back_image = response.data.data.image_url
@@ -810,25 +793,64 @@ const handleApplyCrew = () => {
   router.push('/crew/apply')
 }
 
-// 其他操作
+// 头像上传功能
 const handleAvatarUpload = () => {
-  message.info('头像上传功能开发中...')
-}
+  // 创建文件选择器
+  const input = document.createElement('input')
+  input.type = 'file'
+  input.accept = 'image/*'
+  input.style.display = 'none'
 
-const handleGoToMerchant = () => {
-  router.push('/merchant')
-}
+  input.onchange = async (event: any) => {
+    const file = event.target.files?.[0]
+    if (!file) return
 
-const handleGoToCrew = () => {
-  router.push('/crew')
-}
+    // 验证文件类型
+    if (!file.type.startsWith('image/')) {
+      message.error('请选择图片文件！')
+      return
+    }
 
-const handleGoToBookings = () => {
-  router.push('/bookings')
-}
+    // 验证文件大小（10MB）
+    if (file.size > 10 * 1024 * 1024) {
+      message.error('图片大小不能超过10MB！')
+      return
+    }
 
-const handleGoToHelp = () => {
-  router.push('/help')
+    try {
+      avatarUploading.value = true
+      message.loading('正在上传头像...', 0)
+
+      const response = await uploadAvatarApiV1UploadAvatarPost({
+        file: file
+      })
+      console.log(response)
+      message.destroy() // 关闭loading消息
+
+      if (response.data?.success && response.data.data?.avatar_url) {
+        // 更新用户头像
+        if (userStore.user) {
+          userStore.user.avatar = response.data.data.avatar_url
+          userStore.setUser(userStore.user)
+          console.log(userStore.user)
+        }
+        message.success('头像上传成功！')
+      } else {
+        throw new Error(response.data?.message || '头像上传失败')
+      }
+    } catch (error: any) {
+      message.destroy()
+      message.error(error.message || '头像上传失败，请重试')
+    } finally {
+      avatarUploading.value = false
+      // 清理临时创建的input元素
+      document.body.removeChild(input)
+    }
+  }
+
+  // 添加到DOM并触发点击
+  document.body.appendChild(input)
+  input.click()
 }
 
 // 工具函数
@@ -879,7 +901,7 @@ const getVerificationStatusColor = (status?: string) => {
     rejected: 'red',
     expired: 'gray'
   }
-  return colors[status || ''] || 'default'
+  return colors[status as keyof typeof colors] || 'default'
 }
 
 const getVerificationStatusText = (status?: string) => {
@@ -889,7 +911,7 @@ const getVerificationStatusText = (status?: string) => {
     rejected: '已拒绝',
     expired: '已过期'
   }
-  return texts[status || ''] || '未认证'
+  return texts[status as keyof typeof texts] || '未认证'
 }
 
 const getIdentityTypeText = (type?: string) => {
@@ -899,7 +921,7 @@ const getIdentityTypeText = (type?: string) => {
     driver_license: '驾驶证',
     other: '其他'
   }
-  return texts[type || ''] || type
+  return texts[type as keyof typeof texts] || type
 }
 
 const maskIdentityNumber = (number?: string) => {
@@ -950,10 +972,10 @@ onMounted(() => {
   font-size: 16px;
 }
 
-.profile-card {
-  margin-bottom: 24px;
+.tabs-card {
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
 }
 
 .user-info-card {
@@ -962,18 +984,33 @@ onMounted(() => {
   margin-bottom: 24px;
 }
 
-.quick-actions-card {
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
 .user-avatar-section {
   text-align: center;
   padding: 16px 0;
 }
 
-.user-avatar {
+.avatar-container {
+  position: relative;
+  display: inline-block;
   margin-bottom: 16px;
+}
+
+.user-avatar {
+  display: block;
+}
+
+.avatar-loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .user-info {
@@ -989,6 +1026,10 @@ onMounted(() => {
 
 .verification-badge {
   margin-top: 8px;
+}
+
+.verification-status {
+  margin-bottom: 16px;
 }
 
 .verification-empty {
@@ -1012,6 +1053,7 @@ onMounted(() => {
   height: 180px;
   border-radius: 8px;
   transition: all 0.3s ease;
+  margin-bottom: 16px;
 }
 
 .role-card:hover {
@@ -1044,6 +1086,7 @@ onMounted(() => {
   font-size: 14px;
   line-height: 1.5;
 }
+
 
 /* 响应式样式 */
 @media (max-width: 768px) {
