@@ -46,6 +46,24 @@ declare namespace API {
     data?: IdentityVerificationResponse | null
   }
 
+  type ApiResponseList_ = {
+    /** Success */
+    success?: boolean
+    /** Message */
+    message?: string
+    /** Data */
+    data?: any[] | null
+  }
+
+  type ApiResponseListOrderListResponse_ = {
+    /** Success */
+    success?: boolean
+    /** Message */
+    message?: string
+    /** Data */
+    data?: OrderListResponse[] | null
+  }
+
   type ApiResponseMerchantResponse_ = {
     /** Success */
     success?: boolean
@@ -60,6 +78,22 @@ declare namespace API {
     /** Message */
     message?: string
     data?: MessageResponse | null
+  }
+
+  type ApiResponseOrderResponse_ = {
+    /** Success */
+    success?: boolean
+    /** Message */
+    message?: string
+    data?: OrderResponse | null
+  }
+
+  type ApiResponseOrderStats_ = {
+    /** Success */
+    success?: boolean
+    /** Message */
+    message?: string
+    data?: OrderStats | null
   }
 
   type ApiResponseToken_ = {
@@ -84,6 +118,10 @@ declare namespace API {
     /** Message */
     message?: string
     data?: UserResponse | null
+  }
+
+  type assignCrewToOrderApiV1OrdersMerchantOrderIdAssignCrewPostParams = {
+    order_id: number
   }
 
   type batchUserOperationApiV1AdminUsersBatchOperationPostParams = {
@@ -127,6 +165,19 @@ declare namespace API {
     images?: string | null
     /** Merchant Id */
     merchant_id: number
+  }
+
+  type BoatInfo = {
+    /** Id */
+    id: number
+    /** Name */
+    name: string
+    /** Boat Type */
+    boat_type: string
+    /** Capacity */
+    capacity?: number | null
+    /** Status */
+    status: string
   }
 
   type BoatListResponse = {
@@ -275,6 +326,11 @@ declare namespace API {
     files: string[]
   }
 
+  type cancelMyOrderApiV1OrdersMyOrderIdCancelPostParams = {
+    order_id: number
+    reason?: string | null
+  }
+
   type CrewCreate = {
     /** Id Card No */
     id_card_no: string
@@ -294,6 +350,21 @@ declare namespace API {
     emergency_phone?: string | null
     /** User Id */
     user_id: number
+  }
+
+  type CrewInfo = {
+    /** Id */
+    id: number
+    /** User Id */
+    user_id: number
+    /** License No */
+    license_no?: string | null
+    /** License Type */
+    license_type?: string | null
+    /** Rating */
+    rating?: string | null
+    /** Is Available */
+    is_available: boolean
   }
 
   type CrewListResponse = {
@@ -400,6 +471,10 @@ declare namespace API {
     user_id: number
   }
 
+  type getAvailableCrewsForOrderApiV1OrdersMerchantOrderIdAvailableCrewsGetParams = {
+    order_id: number
+  }
+
   type getBoatDetailApiV1BoatsBoatIdGetParams = {
     boat_id: number
   }
@@ -427,6 +502,37 @@ declare namespace API {
 
   type getMerchantDetailApiV1MerchantsMerchantIdGetParams = {
     merchant_id: number
+  }
+
+  type getMerchantOrdersApiV1OrdersMerchantGetParams = {
+    /** 订单状态筛选 */
+    status?: OrderStatus | null
+    /** 跳过数量 */
+    skip?: number
+    /** 返回数量 */
+    limit?: number
+  }
+
+  type getMyCrewOrdersApiV1OrdersCrewMyGetParams = {
+    /** 订单状态筛选 */
+    status?: OrderStatus | null
+    /** 跳过数量 */
+    skip?: number
+    /** 返回数量 */
+    limit?: number
+  }
+
+  type getMyOrderDetailApiV1OrdersMyOrderIdGetParams = {
+    order_id: number
+  }
+
+  type getMyOrdersApiV1OrdersMyGetParams = {
+    /** 订单状态筛选 */
+    status?: OrderStatus | null
+    /** 跳过数量 */
+    skip?: number
+    /** 返回数量 */
+    limit?: number
   }
 
   type getRecentUserActivitiesApiV1AdminUsersRecentActivitiesGetParams = {
@@ -644,6 +750,17 @@ declare namespace API {
     user_id: number
   }
 
+  type MerchantInfo = {
+    /** Id */
+    id: number
+    /** Business Name */
+    business_name: string
+    /** Contact Name */
+    contact_name?: string | null
+    /** Contact Phone */
+    contact_phone?: string | null
+  }
+
   type MerchantListResponse = {
     /** Id */
     id: number
@@ -729,6 +846,178 @@ declare namespace API {
     message: string
   }
 
+  type OrderAssignCrew = {
+    /** Crew Id 指派的船员ID */
+    crew_id: number
+    /** Boat Id 指定的船艇ID */
+    boat_id?: number | null
+    /** Notes 派单备注 */
+    notes?: string | null
+  }
+
+  type OrderCreate = {
+    /** 订单类型 */
+    order_type: OrderType
+    /** Service Id 服务ID */
+    service_id?: number | null
+    /** Product Id 农产品ID */
+    product_id?: number | null
+    /** Quantity 数量 */
+    quantity?: number
+    /** Participants 参与人数 */
+    participants?: number | null
+    /** Scheduled At 预约服务时间 */
+    scheduled_at: string
+    /** Contact Name 联系人姓名 */
+    contact_name?: string | null
+    /** Contact Phone 联系电话 */
+    contact_phone?: string | null
+    /** Special Requirements 特殊需求 */
+    special_requirements?: string | null
+    /** Notes 备注 */
+    notes?: string | null
+    /** Coupon Id 使用的优惠券ID */
+    coupon_id?: number | null
+  }
+
+  type OrderListResponse = {
+    /** Id */
+    id: number
+    /** Order No */
+    order_no: string
+    order_type: OrderType
+    status: OrderStatus
+    /** Service Name */
+    service_name?: string | null
+    /** Total Price */
+    total_price: string
+    /** Scheduled At */
+    scheduled_at: string
+    /** Created At */
+    created_at: string
+    /** User Name */
+    user_name?: string | null
+    /** Merchant Name */
+    merchant_name?: string | null
+    /** Crew Name */
+    crew_name?: string | null
+  }
+
+  type OrderResponse = {
+    /** Id */
+    id: number
+    /** Order No */
+    order_no: string
+    /** User Id */
+    user_id: number
+    /** Merchant Id */
+    merchant_id: number
+    order_type: OrderType
+    status: OrderStatus
+    /** Service Id */
+    service_id?: number | null
+    /** Product Id */
+    product_id?: number | null
+    /** Boat Id */
+    boat_id?: number | null
+    /** Crew Id */
+    crew_id?: number | null
+    /** Quantity */
+    quantity: number
+    /** Unit Price */
+    unit_price: string
+    /** Subtotal */
+    subtotal: string
+    /** Discount Amount */
+    discount_amount: string
+    /** Total Price */
+    total_price: string
+    /** Scheduled At */
+    scheduled_at: string
+    /** Service Date */
+    service_date?: string | null
+    /** Service Time */
+    service_time?: string | null
+    /** Duration */
+    duration?: number | null
+    /** Participants */
+    participants?: number | null
+    /** Contact Name */
+    contact_name?: string | null
+    /** Contact Phone */
+    contact_phone?: string | null
+    /** Special Requirements */
+    special_requirements?: string | null
+    /** Notes */
+    notes?: string | null
+    /** Coupon Id */
+    coupon_id?: number | null
+    /** Created At */
+    created_at: string
+    /** Updated At */
+    updated_at: string
+    /** Confirmed At */
+    confirmed_at?: string | null
+    /** Assigned At */
+    assigned_at?: string | null
+    /** Started At */
+    started_at?: string | null
+    /** Completed At */
+    completed_at?: string | null
+    /** Cancelled At */
+    cancelled_at?: string | null
+    user?: UserInfo | null
+    merchant?: MerchantInfo | null
+    service?: ServiceInfo | null
+    crew?: CrewInfo | null
+    boat?: BoatInfo | null
+  }
+
+  type OrderStats = {
+    /** Total Orders 总订单数 */
+    total_orders?: number
+    /** Pending Orders 待付款订单数 */
+    pending_orders?: number
+    /** Paid Orders 已付款订单数 */
+    paid_orders?: number
+    /** Pending Assignment Orders 待派单订单数 */
+    pending_assignment_orders?: number
+    /** Confirmed Orders 已确认订单数 */
+    confirmed_orders?: number
+    /** In Progress Orders 进行中订单数 */
+    in_progress_orders?: number
+    /** Completed Orders 已完成订单数 */
+    completed_orders?: number
+    /** Cancelled Orders 已取消订单数 */
+    cancelled_orders?: number
+    /** Total Revenue 总营收 */
+    total_revenue?: string
+    /** Today Orders 今日订单数 */
+    today_orders?: number
+    /** Today Revenue 今日营收 */
+    today_revenue?: string
+  }
+
+  type OrderStatus =
+    | 'pending'
+    | 'paid'
+    | 'pending_assignment'
+    | 'confirmed'
+    | 'in_progress'
+    | 'completed'
+    | 'awaiting_review'
+    | 'cancelled'
+    | 'refunded'
+
+  type OrderStatusUpdate = {
+    /** 新状态 */
+    status: OrderStatus
+    /** Notes 状态变更备注 */
+    notes?: string | null
+  }
+
+  type OrderType = 'service' | 'product'
+
   type PaginatedResponseBoatListResponse_ = {
     /** Items */
     items: BoatListResponse[]
@@ -798,6 +1087,21 @@ declare namespace API {
     verification_id: number
   }
 
+  type ServiceInfo = {
+    /** Id */
+    id: number
+    /** Name */
+    name: string
+    /** Service Type */
+    service_type: string
+    /** Base Price */
+    base_price: string
+    /** Duration */
+    duration?: number | null
+    /** Max Participants */
+    max_participants?: number | null
+  }
+
   type softDeleteUserApiV1AdminUsersUserIdSoftDeletePostParams = {
     user_id: number
   }
@@ -830,6 +1134,10 @@ declare namespace API {
     crew_id: number
   }
 
+  type updateCrewOrderStatusApiV1OrdersCrewOrderIdStatusPutParams = {
+    order_id: number
+  }
+
   type updateCrewRatingInfoApiV1CrewsCrewIdRatingPutParams = {
     crew_id: number
     /** 评分(0-5) */
@@ -842,6 +1150,10 @@ declare namespace API {
 
   type updateMerchantInfoApiV1MerchantsMerchantIdPutParams = {
     merchant_id: number
+  }
+
+  type updateMerchantOrderStatusApiV1OrdersMerchantOrderIdStatusPutParams = {
+    order_id: number
   }
 
   type updateUserInfoApiV1AdminUsersUserIdPutParams = {
@@ -878,6 +1190,17 @@ declare namespace API {
     /** Password */
     password: string
     role?: UserRole
+  }
+
+  type UserInfo = {
+    /** Id */
+    id: number
+    /** Username */
+    username: string
+    /** Real Name */
+    real_name?: string | null
+    /** Phone */
+    phone?: string | null
   }
 
   type UserLogin = {
