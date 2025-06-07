@@ -7,6 +7,7 @@ import * as users from './users'
 import * as merchants from './merchants'
 import * as crews from './crews'
 import * as boats from './boats'
+import * as service from './service'
 import * as order from './order'
 import * as admin from './admin'
 import * as identity from './identity'
@@ -19,6 +20,7 @@ export default {
   merchants,
   crews,
   boats,
+  service,
   order,
   admin,
   identity,

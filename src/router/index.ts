@@ -104,6 +104,86 @@ const routes: RouteRecordRaw[] = [
     ]
   },
   {
+    path: '/orders',
+    name: 'Orders',
+    component: () => import('@/layouts/AppLayout.vue'),
+    meta: {
+      requiresAuth: true,
+      title: '订单管理'
+    },
+    children: [
+      {
+        path: '',
+        redirect: '/orders/my'
+      },
+      // 用户订单页面
+      {
+        path: 'my',
+        name: 'MyOrders',
+        component: () => import('@/views/orders/MyOrders.vue'),
+        meta: {
+          title: '我的订单'
+        }
+      },
+      {
+        path: 'booking',
+        name: 'OrderBooking',
+        component: () => import('@/views/orders/Booking.vue'),
+        meta: {
+          title: '预约服务'
+        }
+      },
+      // 商家订单管理
+      {
+        path: 'merchant',
+        name: 'MerchantOrders',
+        component: () => import('@/views/orders/MerchantOrders.vue'),
+        meta: {
+          requiresRole: ['merchant', 'admin'],
+          title: '商家订单'
+        }
+      },
+      // 船员订单页面
+      {
+        path: 'crew',
+        name: 'CrewOrders',
+        component: () => import('@/views/orders/CrewOrders.vue'),
+        meta: {
+          requiresRole: ['crew', 'admin'],
+          title: '船员订单'
+        }
+      }
+    ]
+  },
+  {
+    path: '/services',
+    name: 'Services',
+    component: () => import('@/layouts/AppLayout.vue'),
+    meta: {
+      requiresAuth: true,
+      title: '服务管理'
+    },
+    children: [
+      {
+        path: '',
+        name: 'ServiceList',
+        component: () => import('@/views/services/List.vue'),
+        meta: {
+          title: '服务列表'
+        }
+      },
+      {
+        path: 'my',
+        name: 'MyServices',
+        component: () => import('@/views/services/MyServices.vue'),
+        meta: {
+          requiresRole: ['merchant', 'admin'],
+          title: '我的服务'
+        }
+      }
+    ]
+  },
+  {
     path: '/profile',
     name: 'Profile',
     component: () => import('@/layouts/AppLayout.vue'),

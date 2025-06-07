@@ -64,6 +64,15 @@ declare namespace API {
     data?: OrderListResponse[] | null
   }
 
+  type ApiResponseListServiceListResponse_ = {
+    /** Success */
+    success?: boolean
+    /** Message */
+    message?: string
+    /** Data */
+    data?: ServiceListResponse[] | null
+  }
+
   type ApiResponseMerchantResponse_ = {
     /** Success */
     success?: boolean
@@ -94,6 +103,14 @@ declare namespace API {
     /** Message */
     message?: string
     data?: OrderStats | null
+  }
+
+  type ApiResponseServiceResponse_ = {
+    /** Success */
+    success?: boolean
+    /** Message */
+    message?: string
+    data?: ServiceResponse | null
   }
 
   type ApiResponseToken_ = {
@@ -467,12 +484,27 @@ declare namespace API {
     merchant_id: number
   }
 
+  type deleteServiceApiV1ServicesServiceIdDeleteParams = {
+    service_id: number
+  }
+
   type deleteUserByIdApiV1AdminUsersUserIdDeleteParams = {
     user_id: number
   }
 
   type getAvailableCrewsForOrderApiV1OrdersMerchantOrderIdAvailableCrewsGetParams = {
     order_id: number
+  }
+
+  type getAvailableServicesApiV1ServicesAvailableGetParams = {
+    /** 服务类型筛选 */
+    service_type?: ServiceType | null
+    /** 地点筛选 */
+    location?: string | null
+    /** 跳过数量 */
+    skip?: number
+    /** 返回数量 */
+    limit?: number
   }
 
   type getBoatDetailApiV1BoatsBoatIdGetParams = {
@@ -535,9 +567,41 @@ declare namespace API {
     limit?: number
   }
 
+  type getMyServicesApiV1ServicesMyGetParams = {
+    /** 服务状态筛选 */
+    status?: ServiceStatus | null
+    /** 跳过数量 */
+    skip?: number
+    /** 返回数量 */
+    limit?: number
+  }
+
   type getRecentUserActivitiesApiV1AdminUsersRecentActivitiesGetParams = {
     /** 查询最近天数 */
     days?: number
+  }
+
+  type getServiceDetailApiV1ServicesServiceIdGetParams = {
+    service_id: number
+  }
+
+  type getServicesApiV1ServicesGetParams = {
+    /** 服务类型筛选 */
+    service_type?: ServiceType | null
+    /** 商家ID筛选 */
+    merchant_id?: number | null
+    /** 最低价格 */
+    min_price?: number | null
+    /** 最高价格 */
+    max_price?: number | null
+    /** 地点筛选 */
+    location?: string | null
+    /** 跳过数量 */
+    skip?: number
+    /** 返回数量 */
+    limit?: number
+    /** 搜索关键词 */
+    search?: string | null
   }
 
   type getUserDetailApiV1AdminUsersUserIdGetParams = {
@@ -1087,6 +1151,37 @@ declare namespace API {
     verification_id: number
   }
 
+  type ServiceCreate = {
+    /** Name 服务名称 */
+    name: string
+    /** 服务类型 */
+    service_type: ServiceType
+    /** Description 服务描述 */
+    description?: string | null
+    /** Base Price 基础价格 */
+    base_price: number | string
+    /** Duration 服务时长(分钟) */
+    duration?: number | null
+    /** Max Participants 最大参与人数 */
+    max_participants?: number | null
+    /** Min Participants 最小参与人数 */
+    min_participants?: number | null
+    /** Location 服务地点 */
+    location?: string | null
+    /** Requirements 服务要求 */
+    requirements?: string | null
+    /** Included Items 包含项目 */
+    included_items?: string | null
+    /** Excluded Items 不包含项目 */
+    excluded_items?: string | null
+    /** Safety Instructions 安全须知 */
+    safety_instructions?: string | null
+    /** Cancellation Policy 取消政策 */
+    cancellation_policy?: string | null
+    /** Images 服务图片URL */
+    images?: string | null
+  }
+
   type ServiceInfo = {
     /** Id */
     id: number
@@ -1100,6 +1195,115 @@ declare namespace API {
     duration?: number | null
     /** Max Participants */
     max_participants?: number | null
+  }
+
+  type ServiceListResponse = {
+    /** Id */
+    id: number
+    /** Name */
+    name: string
+    service_type: ServiceType
+    /** Base Price */
+    base_price: string
+    /** Duration */
+    duration?: number | null
+    /** Max Participants */
+    max_participants?: number | null
+    /** Location */
+    location?: string | null
+    /** Merchant Id */
+    merchant_id: number
+    /** Merchant Name */
+    merchant_name?: string | null
+    status: ServiceStatus
+    /** Total Orders */
+    total_orders?: number | null
+    /** Average Rating */
+    average_rating?: string | null
+    /** Images */
+    images?: string | null
+  }
+
+  type ServiceResponse = {
+    /** Id */
+    id: number
+    /** Name */
+    name: string
+    service_type: ServiceType
+    /** Description */
+    description?: string | null
+    /** Base Price */
+    base_price: string
+    /** Duration */
+    duration?: number | null
+    /** Max Participants */
+    max_participants?: number | null
+    /** Min Participants */
+    min_participants: number
+    /** Location */
+    location?: string | null
+    /** Requirements */
+    requirements?: string | null
+    /** Included Items */
+    included_items?: string | null
+    /** Excluded Items */
+    excluded_items?: string | null
+    /** Safety Instructions */
+    safety_instructions?: string | null
+    /** Cancellation Policy */
+    cancellation_policy?: string | null
+    /** Images */
+    images?: string | null
+    /** Merchant Id */
+    merchant_id: number
+    status: ServiceStatus
+    /** Created At */
+    created_at: string
+    /** Updated At */
+    updated_at: string
+    /** Merchant Name */
+    merchant_name?: string | null
+    /** Total Orders */
+    total_orders?: number | null
+    /** Average Rating */
+    average_rating?: string | null
+  }
+
+  type ServiceStatus = 'active' | 'inactive' | 'seasonal'
+
+  type ServiceType = 'boat_tour' | 'agriculture' | 'cultural' | 'fishing' | 'dining'
+
+  type ServiceUpdate = {
+    /** Name 服务名称 */
+    name?: string | null
+    /** 服务类型 */
+    service_type?: ServiceType | null
+    /** Description 服务描述 */
+    description?: string | null
+    /** Base Price 基础价格 */
+    base_price?: number | string | null
+    /** Duration 服务时长(分钟) */
+    duration?: number | null
+    /** Max Participants 最大参与人数 */
+    max_participants?: number | null
+    /** Min Participants 最小参与人数 */
+    min_participants?: number | null
+    /** Location 服务地点 */
+    location?: string | null
+    /** Requirements 服务要求 */
+    requirements?: string | null
+    /** Included Items 包含项目 */
+    included_items?: string | null
+    /** Excluded Items 不包含项目 */
+    excluded_items?: string | null
+    /** Safety Instructions 安全须知 */
+    safety_instructions?: string | null
+    /** Cancellation Policy 取消政策 */
+    cancellation_policy?: string | null
+    /** Images 服务图片URL */
+    images?: string | null
+    /** 服务状态 */
+    status?: ServiceStatus | null
   }
 
   type softDeleteUserApiV1AdminUsersUserIdSoftDeletePostParams = {
@@ -1154,6 +1358,10 @@ declare namespace API {
 
   type updateMerchantOrderStatusApiV1OrdersMerchantOrderIdStatusPutParams = {
     order_id: number
+  }
+
+  type updateServiceApiV1ServicesServiceIdPutParams = {
+    service_id: number
   }
 
   type updateUserInfoApiV1AdminUsersUserIdPutParams = {
